@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CardapioController;
+use App\Http\Controllers\Api\ProdutoController;
 use App\Http\Controllers\Api\UnidadeController;
 use Illuminate\Support\Facades\Route;
 
@@ -19,3 +21,15 @@ Route::get('unidades/{id}', [UnidadeController::class, 'show'])->whereNumber('id
 Route::put('unidades/{id}', [UnidadeController::class, 'update'])
     ->whereNumber('id')
     ->middleware(['auth:api', 'perfil:ADMIN,GERENTE']);
+
+Route::get('unidades/{id}/cardapio', [CardapioController::class, 'index'])->whereNumber('id');
+Route::put('unidades/{id}/cardapio/{produtoId}', [CardapioController::class, 'salvar'])
+    ->whereNumber(['id', 'produtoId'])
+    ->middleware(['auth:api', 'perfil:GERENTE']);
+
+Route::middleware('auth:api')->group(function () {
+    Route::get('produtos', [ProdutoController::class, 'index'])->middleware('perfil:ADMIN,GERENTE');
+    Route::get('produtos/{id}', [ProdutoController::class, 'show'])->whereNumber('id')->middleware('perfil:ADMIN,GERENTE');
+    Route::post('produtos', [ProdutoController::class, 'store'])->middleware('perfil:ADMIN');
+    Route::put('produtos/{id}', [ProdutoController::class, 'update'])->whereNumber('id')->middleware('perfil:ADMIN');
+});

@@ -2,6 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Domain\Cardapio\ItemCardapio;
+use App\Domain\Cardapio\Produto;
+use App\Domain\Unidades\FormatoUnidade;
 use App\Domain\Unidades\Unidade;
 use App\Domain\Usuarios\Perfil;
 use App\Domain\Usuarios\Usuario;
@@ -35,5 +38,18 @@ class SeedTest extends TestCase
         $this->seed();
 
         $this->postJson('/auth/login', ['email' => 'admin@raizes.com', 'senha' => 'senha123'])->assertOk();
+    }
+
+    public function test_seed_monta_cardapio_sem_produto_de_cozinha_completa_em_unidade_reduzida(): void
+    {
+        $this->seed();
+
+        $this->assertGreaterThan(0, Produto::count());
+        $this->assertGreaterThan(0, ItemCardapio::count());
+
+        $incompativeis = ItemCardapio::whereHas('unidade', fn ($q) => $q->where('formato', FormatoUnidade::REDUZIDA))
+            ->whereHas('produto', fn ($q) => $q->where('exige_cozinha_completa', true))
+            ->count();
+        $this->assertSame(0, $incompativeis);
     }
 }

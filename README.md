@@ -56,9 +56,25 @@ Perfis: ADMIN, GERENTE, ATENDENTE, COZINHA e CLIENTE.
 Os horários vão como `[{ "diaSemana": 1, "abre": "10:00", "fecha": "22:00" }]` (0 = domingo).
 A lista enviada substitui a anterior, e dia que não estiver nela fica fechado.
 
+## Produtos e cardápio
+
+O catálogo de produtos é único para a rede. Cada unidade monta o próprio cardápio, com preço, disponibilidade, período sazonal e descrição regional.
+
+| Método | Rota | Quem acessa | O que faz |
+| --- | --- | --- | --- |
+| GET | `/produtos`, `/produtos/{id}` | ADMIN, GERENTE | consulta o catálogo (`page` e `limit`) |
+| POST | `/produtos` | ADMIN | cadastra produto |
+| PUT | `/produtos/{id}` | ADMIN | edita ou desativa (`ativo: false`) |
+| GET | `/unidades/{id}/cardapio` | público | itens disponíveis hoje; `?data=AAAA-MM-DD` consulta outro dia |
+| PUT | `/unidades/{id}/cardapio/{produtoId}` | GERENTE da unidade | cria ou substitui o item no cardápio |
+
+Corpo do `PUT` do cardápio: `preco` (obrigatório), `disponivel` (padrão `true`), `inicioSazonal` e `fimSazonal` no formato `MM-DD` (o período repete todo ano e pode passar da virada, como `12-01` a `01-31`) e `descricaoRegional`. O que não for enviado é limpo.
+
+Produto que exige cozinha completa não entra no cardápio de unidade reduzida, e a unidade não vira reduzida com um desses no cardápio (`PRODUTO_INCOMPATIVEL_COM_UNIDADE`).
+
 ## Usuários do seed
 
-`php artisan migrate --seed` cria 3 unidades e estes usuários (todos com a senha `senha123`, só para desenvolvimento):
+`php artisan migrate --seed` cria 3 unidades, 9 produtos com cardápio e estes usuários (todos com a senha `senha123`, só para desenvolvimento):
 
 | E-mail | Perfil |
 | --- | --- |

@@ -4,6 +4,7 @@ namespace App\Domain\Unidades;
 
 use App\Domain\Exceptions\CodigoErro;
 use App\Domain\Exceptions\NegocioException;
+use App\Domain\Cardapio\ItemCardapio;
 use Carbon\CarbonInterface;
 use Database\Factories\UnidadeFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -34,6 +35,11 @@ class Unidade extends Model
     public function horarios(): HasMany
     {
         return $this->hasMany(HorarioFuncionamento::class)->orderBy('dia_semana');
+    }
+
+    public function itensCardapio(): HasMany
+    {
+        return $this->hasMany(ItemCardapio::class);
     }
 
     // RN02: a unidade tem que existir e estar ativa
