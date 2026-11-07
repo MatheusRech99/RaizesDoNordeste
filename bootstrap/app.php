@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\ExigePerfil;
 use App\Http\Middleware\RequestId;
 use App\Http\RespostaDeErro;
 use Illuminate\Foundation\Application;
@@ -15,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->prepend(RequestId::class);
+        $middleware->alias(['perfil' => ExigePerfil::class]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // a aplicacao inteira e API, entao toda falha sai em JSON
