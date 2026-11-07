@@ -11,6 +11,8 @@ class DatabaseSeeder extends Seeder
         $this->call([
             UnidadeSeeder::class,
             UsuarioSeeder::class,
+            ProdutoSeeder::class,
+            CardapioSeeder::class,
         ]);
     }
 }

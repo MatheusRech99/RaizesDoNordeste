@@ -17,4 +17,10 @@ class UnidadePolicy
 
         return $usuario->perfil === Perfil::GERENTE && $usuario->unidade_id === $unidade->id;
     }
+
+    // RF10: so o gerente da unidade monta o cardapio dela
+    public function montarCardapio(Usuario $usuario, Unidade $unidade): bool
+    {
+        return $usuario->perfil === Perfil::GERENTE && $usuario->unidade_id === $unidade->id;
+    }
 }
