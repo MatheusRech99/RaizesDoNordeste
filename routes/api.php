@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\UnidadeController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->group(function () {
@@ -12,3 +13,9 @@ Route::prefix('auth')->group(function () {
         Route::get('me', [AuthController::class, 'me']);
     });
 });
+
+Route::get('unidades', [UnidadeController::class, 'index']);
+Route::get('unidades/{id}', [UnidadeController::class, 'show'])->whereNumber('id');
+Route::put('unidades/{id}', [UnidadeController::class, 'update'])
+    ->whereNumber('id')
+    ->middleware(['auth:api', 'perfil:ADMIN,GERENTE']);

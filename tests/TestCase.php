@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+use App\Domain\Usuarios\Usuario;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
@@ -13,5 +14,10 @@ abstract class TestCase extends BaseTestCase
         $this->app['tymon.jwt']->unsetToken();
 
         return $this->withToken($token);
+    }
+
+    protected function comoUsuario(Usuario $usuario): static
+    {
+        return $this->comToken(auth('api')->login($usuario));
     }
 }

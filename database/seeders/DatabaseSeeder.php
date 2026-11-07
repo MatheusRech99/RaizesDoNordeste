@@ -8,6 +8,9 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // unidades e usuarios internos entram na etapa 3
+        $this->call([
+            UnidadeSeeder::class,
+            UsuarioSeeder::class,
+        ]);
     }
 }

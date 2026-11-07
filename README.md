@@ -6,7 +6,7 @@ Projeto Multidisciplinar UNINTER, trilha Back-End.
 
 ## Stack
 
-Laravel 13, PHP 8.3+, MySQL 8, autenticação JWT, OpenAPI/Swagger.
+Laravel 13, PHP 8.3+, MariaDB 10.11+ (compatível com MySQL 8), autenticação JWT, OpenAPI/Swagger.
 
 ## Como executar
 
@@ -15,7 +15,19 @@ composer install
 cp .env.example .env
 php artisan key:generate
 php artisan jwt:secret
-# ajuste DB_* no .env e crie o banco raizes_nordeste
+```
+
+Crie o banco e o usuário (como root do MariaDB):
+
+```bash
+sudo mysql -e "CREATE DATABASE raizes_nordeste CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'raizes'@'localhost' IDENTIFIED BY 'raizes123';
+GRANT ALL ON raizes_nordeste.* TO 'raizes'@'localhost';"
+```
+
+Os valores de `DB_*` do `.env.example` já batem com isso. Depois:
+
+```bash
 php artisan migrate --seed
 php artisan serve
 ```
@@ -33,13 +45,45 @@ JWT com expiração de 60 minutos. O token vai no header `Authorization: Bearer 
 
 Perfis: ADMIN, GERENTE, ATENDENTE, COZINHA e CLIENTE.
 
+## Unidades
+
+| Método | Rota | Quem acessa | O que faz |
+| --- | --- | --- | --- |
+| GET | `/unidades` | público | lista as unidades ativas, com `page` e `limit` |
+| GET | `/unidades/{id}` | público | consulta uma unidade com formato e horários |
+| PUT | `/unidades/{id}` | ADMIN, GERENTE da unidade | muda `formato` e/ou `horarios` |
+
+Os horários vão como `[{ "diaSemana": 1, "abre": "10:00", "fecha": "22:00" }]` (0 = domingo).
+A lista enviada substitui a anterior, e dia que não estiver nela fica fechado.
+
+## Usuários do seed
+
+`php artisan migrate --seed` cria 3 unidades e estes usuários (todos com a senha `senha123`, só para desenvolvimento):
+
+| E-mail | Perfil |
+| --- | --- |
+| `admin@raizes.com` | ADMIN |
+| `gerente1@raizes.com`, `atendente1@raizes.com`, `cozinha1@raizes.com` | unidade 1 (Recife) |
+| `gerente2@raizes.com`, `atendente2@raizes.com`, `cozinha2@raizes.com` | unidade 2 (Fortaleza) |
+| `gerente3@raizes.com`, `atendente3@raizes.com`, `cozinha3@raizes.com` | unidade 3 (São Paulo) |
+| `cliente@raizes.com` | CLIENTE |
+
 ## Testes
 
 ```bash
 php artisan test
 ```
 
-Os testes usam SQLite em memória por padrão (`phpunit.xml`).
+Os testes usam SQLite em memória por padrão (`phpunit.xml`), então não precisam do MariaDB.
+
+Para rodar no MariaDB (cobre o `CHECK` e as chaves estrangeiras, que o SQLite não valida), crie um banco de teste e passe as variáveis:
+
+```bash
+sudo mysql -e "CREATE DATABASE raizes_nordeste_teste CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+GRANT ALL ON raizes_nordeste_teste.* TO 'raizes'@'localhost';"
+
+DB_CONNECTION=mysql DB_DATABASE=raizes_nordeste_teste php artisan test
+```
 
 ## Estado
 
