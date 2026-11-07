@@ -14,10 +14,24 @@ Laravel 13, PHP 8.3+, MySQL 8, autenticação JWT, OpenAPI/Swagger.
 composer install
 cp .env.example .env
 php artisan key:generate
+php artisan jwt:secret
 # ajuste DB_* no .env e crie o banco raizes_nordeste
 php artisan migrate --seed
 php artisan serve
 ```
+
+## Autenticação
+
+JWT com expiração de 60 minutos. O token vai no header `Authorization: Bearer <token>`.
+
+| Método | Rota | O que faz |
+| --- | --- | --- |
+| POST | `/auth/login` | recebe `email` e `senha`, devolve `accessToken` |
+| POST | `/auth/refresh` | troca o token por um novo (aceita expirado, dentro de 24 h) |
+| POST | `/auth/logout` | invalida o token |
+| GET | `/auth/me` | dados do usuário logado |
+
+Perfis: ADMIN, GERENTE, ATENDENTE, COZINHA e CLIENTE.
 
 ## Testes
 

@@ -10,6 +10,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use PHPOpenSourceSaver\JWTAuth\Exceptions\JWTException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Throwable;
 
@@ -31,7 +32,7 @@ class RespostaDeErro
             return $this->montar($request, CodigoErro::VALIDACAO, 'Dados inválidos', $detalhes);
         }
 
-        if ($e instanceof AuthenticationException) {
+        if ($e instanceof AuthenticationException || $e instanceof JWTException) {
             return $this->montar($request, CodigoErro::NAO_AUTENTICADO, 'Token ausente, inválido ou expirado');
         }
 
