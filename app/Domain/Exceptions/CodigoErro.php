@@ -1,0 +1,51 @@
+<?php
+
+namespace App\Domain\Exceptions;
+
+enum CodigoErro: string
+{
+    case VALIDACAO = 'VALIDACAO';
+    case NAO_AUTENTICADO = 'NAO_AUTENTICADO';
+    case ACESSO_NEGADO = 'ACESSO_NEGADO';
+    case NAO_ENCONTRADO = 'NAO_ENCONTRADO';
+    case METODO_NAO_PERMITIDO = 'METODO_NAO_PERMITIDO';
+    case MUITAS_REQUISICOES = 'MUITAS_REQUISICOES';
+    case ERRO_INTERNO = 'ERRO_INTERNO';
+
+    // regras de negocio (secao 4 do planejamento)
+    case UNIDADE_NAO_ENCONTRADA = 'UNIDADE_NAO_ENCONTRADA';
+    case PRODUTO_NAO_ENCONTRADO = 'PRODUTO_NAO_ENCONTRADO';
+    case ESTOQUE_INSUFICIENTE = 'ESTOQUE_INSUFICIENTE';
+    case TRANSICAO_INVALIDA = 'TRANSICAO_INVALIDA';
+    case CHAVE_IDEMPOTENCIA_CONFLITANTE = 'CHAVE_IDEMPOTENCIA_CONFLITANTE';
+    case PEDIDO_NAO_PAGAVEL = 'PEDIDO_NAO_PAGAVEL';
+    case PAGAMENTO_RECUSADO = 'PAGAMENTO_RECUSADO';
+    case GATEWAY_INDISPONIVEL = 'GATEWAY_INDISPONIVEL';
+    case UNIDADE_FECHADA = 'UNIDADE_FECHADA';
+    case PRODUTO_INDISPONIVEL = 'PRODUTO_INDISPONIVEL';
+    case PRODUTO_INCOMPATIVEL_COM_UNIDADE = 'PRODUTO_INCOMPATIVEL_COM_UNIDADE';
+
+    public function status(): int
+    {
+        return match ($this) {
+            self::NAO_AUTENTICADO => 401,
+            self::PAGAMENTO_RECUSADO => 402,
+            self::ACESSO_NEGADO => 403,
+            self::NAO_ENCONTRADO,
+            self::UNIDADE_NAO_ENCONTRADA,
+            self::PRODUTO_NAO_ENCONTRADO => 404,
+            self::METODO_NAO_PERMITIDO => 405,
+            self::ESTOQUE_INSUFICIENTE,
+            self::TRANSICAO_INVALIDA,
+            self::CHAVE_IDEMPOTENCIA_CONFLITANTE,
+            self::PEDIDO_NAO_PAGAVEL,
+            self::UNIDADE_FECHADA,
+            self::PRODUTO_INDISPONIVEL => 409,
+            self::VALIDACAO,
+            self::PRODUTO_INCOMPATIVEL_COM_UNIDADE => 422,
+            self::MUITAS_REQUISICOES => 429,
+            self::ERRO_INTERNO => 500,
+            self::GATEWAY_INDISPONIVEL => 503,
+        };
+    }
+}
