@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CardapioController;
 use App\Http\Controllers\Api\ClienteController;
+use App\Http\Controllers\Api\EstoqueController;
 use App\Http\Controllers\Api\ProdutoController;
 use App\Http\Controllers\Api\UnidadeController;
 use Illuminate\Support\Facades\Route;
@@ -34,6 +35,12 @@ Route::get('unidades/{id}/cardapio', [CardapioController::class, 'index'])->wher
 Route::put('unidades/{id}/cardapio/{produtoId}', [CardapioController::class, 'salvar'])
     ->whereNumber(['id', 'produtoId'])
     ->middleware(['auth:api', 'perfil:GERENTE']);
+
+Route::middleware('auth:api')->whereNumber('id')->group(function () {
+    Route::get('unidades/{id}/estoque', [EstoqueController::class, 'index'])->middleware('perfil:ADMIN,GERENTE,ATENDENTE');
+    Route::get('unidades/{id}/estoque/movimentacoes', [EstoqueController::class, 'movimentacoes'])->middleware('perfil:ADMIN,GERENTE,ATENDENTE');
+    Route::post('unidades/{id}/estoque/movimentacoes', [EstoqueController::class, 'movimentar'])->middleware('perfil:GERENTE');
+});
 
 Route::middleware('auth:api')->group(function () {
     Route::get('produtos', [ProdutoController::class, 'index'])->middleware('perfil:ADMIN,GERENTE');

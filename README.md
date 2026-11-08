@@ -72,6 +72,20 @@ Corpo do `PUT` do cardápio: `preco` (obrigatório), `disponivel` (padrão `true
 
 Produto que exige cozinha completa não entra no cardápio de unidade reduzida, e a unidade não vira reduzida com um desses no cardápio (`PRODUTO_INCOMPATIVEL_COM_UNIDADE`).
 
+## Estoque
+
+Saldo por produto em cada unidade. Toda mudança vira uma movimentação com tipo, quantidade, motivo, usuário e saldo depois dela.
+
+| Método | Rota | Quem acessa | O que faz |
+| --- | --- | --- | --- |
+| GET | `/unidades/{id}/estoque` | ADMIN, GERENTE e ATENDENTE da unidade | saldo atual por produto (`page` e `limit`) |
+| GET | `/unidades/{id}/estoque/movimentacoes` | idem | histórico, do mais novo ao mais antigo; filtros `produtoId` e `tipo` |
+| POST | `/unidades/{id}/estoque/movimentacoes` | GERENTE da unidade | registra `ENTRADA`, `SAIDA` ou `AJUSTE` |
+
+Corpo do `POST`: `produtoId`, `tipo`, `quantidade` e `motivo`. Em `ENTRADA` e `SAIDA` a quantidade é positiva; o `AJUSTE` aceita valor negativo, mas não zero. Se o saldo ficasse negativo, a resposta é 409 `ESTOQUE_INSUFICIENTE` com o saldo disponível em `details`.
+
+O saldo é lido com `SELECT ... FOR UPDATE` dentro de uma transação, e o banco tem um `CHECK (quantidade >= 0)` como segunda barreira. Movimentações manuais geram auditoria. O tipo `ESTORNO` é só interno (devolução de pedido cancelado).
+
 ## Clientes e consentimentos (LGPD)
 
 | Método | Rota | Quem acessa | O que faz |
@@ -92,7 +106,7 @@ A tabela só aceita INSERT: o model lança exceção em `update`/`delete` e o ba
 
 ## Usuários do seed
 
-`php artisan migrate --seed` cria 3 unidades, 9 produtos com cardápio e estes usuários (todos com a senha `senha123`, só para desenvolvimento):
+`php artisan migrate --seed` cria 3 unidades, 9 produtos com cardápio e estoque (50 de cada, e só 5 de carne de sol, para testar o estoque insuficiente) e estes usuários (todos com a senha `senha123`, só para desenvolvimento):
 
 | E-mail | Perfil |
 | --- | --- |
