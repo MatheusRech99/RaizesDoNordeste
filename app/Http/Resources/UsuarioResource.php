@@ -17,6 +17,7 @@ class UsuarioResource extends JsonResource
             'perfil' => $this->perfil->value,
             'unidadeId' => $this->unidade_id,
             'telefone' => $this->telefone,
+            'consentimentos' => ConsentimentoResource::collection($this->whenLoaded('consentimentos')),
         ];
     }
 }

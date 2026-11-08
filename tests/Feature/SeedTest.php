@@ -6,6 +6,7 @@ use App\Domain\Cardapio\ItemCardapio;
 use App\Domain\Cardapio\Produto;
 use App\Domain\Unidades\FormatoUnidade;
 use App\Domain\Unidades\Unidade;
+use App\Domain\Usuarios\Finalidade;
 use App\Domain\Usuarios\Perfil;
 use App\Domain\Usuarios\Usuario;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -51,5 +52,15 @@ class SeedTest extends TestCase
             ->whereHas('produto', fn ($q) => $q->where('exige_cozinha_completa', true))
             ->count();
         $this->assertSame(0, $incompativeis);
+    }
+
+    public function test_cliente_do_seed_tem_consentimentos(): void
+    {
+        $this->seed();
+
+        $cliente = Usuario::where('email', 'cliente@raizes.com')->first();
+        $this->assertTrue($cliente->temConsentimento(Finalidade::TERMOS));
+        $this->assertTrue($cliente->temConsentimento(Finalidade::FIDELIDADE));
+        $this->assertFalse($cliente->temConsentimento(Finalidade::MARKETING));
     }
 }

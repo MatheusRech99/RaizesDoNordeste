@@ -4,6 +4,7 @@ namespace App\Domain\Usuarios;
 
 use Database\Factories\UsuarioFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 
@@ -32,6 +33,20 @@ class Usuario extends Authenticatable implements JWTSubject
     protected static function newFactory(): UsuarioFactory
     {
         return UsuarioFactory::new();
+    }
+
+    public function consentimentos(): HasMany
+    {
+        return $this->hasMany(Consentimento::class);
+    }
+
+    public function temConsentimento(Finalidade $finalidade): bool
+    {
+        return $this->consentimentos()
+            ->where('finalidade', $finalidade)
+            ->where('aceito', true)
+            ->whereNull('revogado_em')
+            ->exists();
     }
 
     public function getAuthPassword(): string
