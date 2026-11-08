@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CardapioController;
 use App\Http\Controllers\Api\ClienteController;
 use App\Http\Controllers\Api\EstoqueController;
+use App\Http\Controllers\Api\PedidoController;
 use App\Http\Controllers\Api\ProdutoController;
 use App\Http\Controllers\Api\UnidadeController;
 use Illuminate\Support\Facades\Route;
@@ -48,3 +49,6 @@ Route::middleware('auth:api')->group(function () {
     Route::post('produtos', [ProdutoController::class, 'store'])->middleware('perfil:ADMIN');
     Route::put('produtos/{id}', [ProdutoController::class, 'update'])->whereNumber('id')->middleware('perfil:ADMIN');
 });
+
+Route::post('pedidos', [PedidoController::class, 'store'])
+    ->middleware(['auth:api', 'perfil:CLIENTE,ATENDENTE', 'idempotente']);

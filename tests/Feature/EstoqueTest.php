@@ -9,6 +9,7 @@ use App\Domain\Cardapio\Produto;
 use App\Domain\Estoque\Estoque;
 use App\Domain\Estoque\MovimentacaoEstoque;
 use App\Domain\Estoque\TipoMovimentacao;
+use App\Domain\Pedidos\Pedido;
 use App\Domain\Unidades\Unidade;
 use App\Domain\Usuarios\Perfil;
 use App\Domain\Usuarios\Usuario;
@@ -143,18 +144,20 @@ class EstoqueTest extends TestCase
     public function test_movimentacao_de_pedido_nao_gera_auditoria_de_ajuste(): void
     {
         $this->mover('ENTRADA', 10)->assertCreated();
+        $pedido = Pedido::factory()->create(['unidade_id' => $this->unidade->id]);
 
-        app(MovimentarEstoque::class)->executar($this->unidade, $this->produto->id, TipoMovimentacao::SAIDA, 2, 'Pedido', $this->gerente, 77);
+        app(MovimentarEstoque::class)->executar($this->unidade, $this->produto->id, TipoMovimentacao::SAIDA, 2, 'Pedido', $this->gerente, $pedido->id);
 
         $this->assertSame(1, RegistroAuditoria::count());
-        $this->assertSame(77, MovimentacaoEstoque::orderByDesc('id')->first()->pedido_id);
+        $this->assertSame($pedido->id, MovimentacaoEstoque::orderByDesc('id')->first()->pedido_id);
         $this->assertSame(8, $this->saldo());
     }
 
     public function test_estorno_devolve_ao_saldo(): void
     {
         $this->mover('ENTRADA', 10)->assertCreated();
-        $mov = app(MovimentarEstoque::class)->executar($this->unidade, $this->produto->id, TipoMovimentacao::ESTORNO, 3, 'Cancelamento', $this->gerente, 5);
+        $pedido = Pedido::factory()->create(['unidade_id' => $this->unidade->id]);
+        $mov = app(MovimentarEstoque::class)->executar($this->unidade, $this->produto->id, TipoMovimentacao::ESTORNO, 3, 'Cancelamento', $this->gerente, $pedido->id);
 
         $this->assertSame(3, $mov->quantidade);
         $this->assertSame(13, $this->saldo());
@@ -163,10 +166,11 @@ class EstoqueTest extends TestCase
     public function test_falha_depois_de_mexer_no_saldo_desfaz_tudo(): void
     {
         $this->mover('ENTRADA', 10)->assertCreated();
+        $pedido = Pedido::factory()->create(['unidade_id' => $this->unidade->id]);
 
         try {
-            DB::transaction(function () {
-                app(MovimentarEstoque::class)->executar($this->unidade, $this->produto->id, TipoMovimentacao::SAIDA, 4, 'Pedido', $this->gerente, 1);
+            DB::transaction(function () use ($pedido) {
+                app(MovimentarEstoque::class)->executar($this->unidade, $this->produto->id, TipoMovimentacao::SAIDA, 4, 'Pedido', $this->gerente, $pedido->id);
                 throw new \RuntimeException('segundo item sem estoque');
             });
         } catch (\RuntimeException) {
