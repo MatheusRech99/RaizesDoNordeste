@@ -2,14 +2,20 @@
 
 namespace App\Application\Clientes;
 
+use App\Domain\Auditoria\Acao;
 use App\Domain\Usuarios\Consentimento;
 use App\Domain\Usuarios\Finalidade;
 use App\Domain\Usuarios\Perfil;
 use App\Domain\Usuarios\Usuario;
+use App\Infrastructure\Auditoria\AuditLogger;
 use Illuminate\Support\Facades\DB;
 
 class CadastrarCliente
 {
+    public function __construct(private AuditLogger $auditoria)
+    {
+    }
+
     public function executar(array $dados, string $ip): Usuario
     {
         return DB::transaction(function () use ($dados, $ip) {
@@ -38,6 +44,8 @@ class CadastrarCliente
                     'ip' => $ip,
                 ]);
             }
+
+            $this->auditoria->registrar(Acao::CADASTRO_CLIENTE, $cliente, null, ['consentimentos' => $escolhas], $cliente->id);
 
             return $cliente->load('consentimentos');
         });
