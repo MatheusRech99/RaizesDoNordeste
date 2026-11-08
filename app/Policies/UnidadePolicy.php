@@ -23,4 +23,20 @@ class UnidadePolicy
     {
         return $usuario->perfil === Perfil::GERENTE && $usuario->unidade_id === $unidade->id;
     }
+
+    // RF13/RN13: a matriz ve tudo, gerente e atendente so a propria unidade
+    public function verEstoque(Usuario $usuario, Unidade $unidade): bool
+    {
+        if ($usuario->perfil === Perfil::ADMIN) {
+            return true;
+        }
+
+        return in_array($usuario->perfil, [Perfil::GERENTE, Perfil::ATENDENTE]) && $usuario->unidade_id === $unidade->id;
+    }
+
+    // RF12: so o gerente da unidade mexe no estoque
+    public function movimentarEstoque(Usuario $usuario, Unidade $unidade): bool
+    {
+        return $usuario->perfil === Perfil::GERENTE && $usuario->unidade_id === $unidade->id;
+    }
 }

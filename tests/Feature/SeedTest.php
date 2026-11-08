@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Domain\Cardapio\ItemCardapio;
 use App\Domain\Cardapio\Produto;
+use App\Domain\Estoque\Estoque;
+use App\Domain\Estoque\MovimentacaoEstoque;
 use App\Domain\Unidades\FormatoUnidade;
 use App\Domain\Unidades\Unidade;
 use App\Domain\Usuarios\Finalidade;
@@ -62,5 +64,14 @@ class SeedTest extends TestCase
         $this->assertTrue($cliente->temConsentimento(Finalidade::TERMOS));
         $this->assertTrue($cliente->temConsentimento(Finalidade::FIDELIDADE));
         $this->assertFalse($cliente->temConsentimento(Finalidade::MARKETING));
+    }
+
+    public function test_seed_cria_estoque_para_todo_item_do_cardapio(): void
+    {
+        $this->seed();
+
+        $this->assertSame(ItemCardapio::count(), Estoque::count());
+        $this->assertSame(0, Estoque::where('quantidade', '<=', 0)->count());
+        $this->assertSame(Estoque::count(), MovimentacaoEstoque::where('tipo', 'ENTRADA')->count());
     }
 }
