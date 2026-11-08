@@ -84,6 +84,12 @@ Corpo do `POST /clientes`: `nome`, `email`, `senha` (mínimo 8), `telefone` e `d
 
 Fidelidade e marketing são consentimentos separados. Cada um é gravado com a versão do termo (`LGPD_VERSAO_TERMO`), a data e o IP. A data de nascimento só é aceita junto com o consentimento de fidelidade e é apagada se ele for revogado. Ela nunca aparece nas respostas. Os termos não são revogáveis por essa rota (422).
 
+## Auditoria
+
+Operações sensíveis gravam um registro na tabela `auditoria` (quem, ação, entidade, dados antes e depois, IP e data) dentro da mesma transação da operação, então se a operação desfaz o registro some junto. Por enquanto são o cadastro de cliente e a revogação de consentimento; as demais entram com as etapas de pedido, estoque e cancelamento.
+
+A tabela só aceita INSERT: o model lança exceção em `update`/`delete` e o banco tem triggers que barram qualquer alteração ou exclusão direta. Dados como senha e data de nascimento nunca entram nos registros.
+
 ## Usuários do seed
 
 `php artisan migrate --seed` cria 3 unidades, 9 produtos com cardápio e estes usuários (todos com a senha `senha123`, só para desenvolvimento):
