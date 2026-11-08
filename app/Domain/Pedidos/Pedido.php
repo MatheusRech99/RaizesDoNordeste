@@ -3,9 +3,11 @@
 namespace App\Domain\Pedidos;
 
 use App\Domain\Unidades\Unidade;
+use App\Domain\Usuarios\Perfil;
 use App\Domain\Usuarios\Usuario;
 use Database\Factories\PedidoFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -32,6 +34,16 @@ class Pedido extends Model
     protected static function newFactory(): PedidoFactory
     {
         return PedidoFactory::new();
+    }
+
+    // RN13: o que cada perfil pode enxergar na listagem
+    public function scopeVisivelPara(Builder $query, Usuario $usuario): void
+    {
+        match ($usuario->perfil) {
+            Perfil::ADMIN => null,
+            Perfil::CLIENTE => $query->where('cliente_id', $usuario->id),
+            default => $query->where('unidade_id', $usuario->unidade_id),
+        };
     }
 
     public function unidade(): BelongsTo
