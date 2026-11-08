@@ -86,6 +86,16 @@ Corpo do `POST`: `produtoId`, `tipo`, `quantidade` e `motivo`. Em `ENTRADA` e `S
 
 O saldo é lido com `SELECT ... FOR UPDATE` dentro de uma transação, e o banco tem um `CHECK (quantidade >= 0)` como segunda barreira. Movimentações manuais geram auditoria. O tipo `ESTORNO` é só interno (devolução de pedido cancelado).
 
+## Idempotência
+
+`POST /pedidos` e `POST /pagamentos` aceitam o header `Idempotency-Key` (1 a 100 caracteres visíveis, sem espaço). A chave é opcional e vale por usuário, por rota e por 24 horas.
+
+- Mesma chave e mesmo corpo: devolve a resposta original, com o header `Idempotent-Replayed: true`, sem executar de novo.
+- Mesma chave com corpo diferente, ou ainda em processamento: 409 `CHAVE_IDEMPOTENCIA_CONFLITANTE`.
+- A resposta só é guardada quando vale como resultado: sucesso (2xx) e recusas de regra de negócio (402, 404, 409). Erro de validação (422) e de servidor (5xx, como o 503 do gateway) liberam a chave, para o cliente corrigir e tentar de novo com a mesma chave.
+
+As chaves vencidas são limpas pelo agendador (`php artisan schedule:work` em dev, ou `schedule:run` no cron).
+
 ## Clientes e consentimentos (LGPD)
 
 | Método | Rota | Quem acessa | O que faz |
