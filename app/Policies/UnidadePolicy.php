@@ -39,4 +39,14 @@ class UnidadePolicy
     {
         return $usuario->perfil === Perfil::GERENTE && $usuario->unidade_id === $unidade->id;
     }
+
+    // RF14/RN13: cliente pede em qualquer unidade, atendente so na dele
+    public function criarPedido(Usuario $usuario, Unidade $unidade): bool
+    {
+        if ($usuario->perfil === Perfil::CLIENTE) {
+            return true;
+        }
+
+        return $usuario->perfil === Perfil::ATENDENTE && $usuario->unidade_id === $unidade->id;
+    }
 }

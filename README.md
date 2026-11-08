@@ -86,6 +86,18 @@ Corpo do `POST`: `produtoId`, `tipo`, `quantidade` e `motivo`. Em `ENTRADA` e `S
 
 O saldo é lido com `SELECT ... FOR UPDATE` dentro de uma transação, e o banco tem um `CHECK (quantidade >= 0)` como segunda barreira. Movimentações manuais geram auditoria. O tipo `ESTORNO` é só interno (devolução de pedido cancelado).
 
+## Pedidos
+
+| Método | Rota | Quem acessa | O que faz |
+| --- | --- | --- | --- |
+| POST | `/pedidos` | CLIENTE, ATENDENTE da unidade | cria o pedido (aceita `Idempotency-Key`) |
+
+Corpo: `canalPedido` (`APP`, `TOTEM`, `BALCAO`, `PICKUP` ou `WEB`), `unidadeId`, `itens` (`[{ "produtoId": 1, "quantidade": 2 }]`) e, só para o atendente, `clienteId`. Preço e total nunca vêm do cliente: o preço é o do cardápio da unidade no momento do pedido e fica gravado no item.
+
+- O cliente usa qualquer canal menos `BALCAO`, e o pedido é dele. O atendente só pede na própria unidade; no `BALCAO` o cliente é opcional, nos outros canais o `clienteId` é obrigatório.
+- O pedido nasce em `AGUARDANDO_PAGAMENTO`, com o estoque já baixado, histórico de status e auditoria, tudo numa transação. Se um item não tiver saldo, nada é gravado.
+- Erros: 422 corpo inválido (canal, itens vazios, quantidade, produto repetido); 404 unidade ou produto fora do cardápio; 409 `UNIDADE_FECHADA`, `PRODUTO_INDISPONIVEL` (desligado, fora do período sazonal ou inativo) e `ESTOQUE_INSUFICIENTE` (com o saldo de cada item em `details`).
+
 ## Idempotência
 
 `POST /pedidos` e `POST /pagamentos` aceitam o header `Idempotency-Key` (1 a 100 caracteres visíveis, sem espaço). A chave é opcional e vale por usuário, por rota e por 24 horas.
