@@ -52,3 +52,8 @@ Route::middleware('auth:api')->group(function () {
 
 Route::post('pedidos', [PedidoController::class, 'store'])
     ->middleware(['auth:api', 'perfil:CLIENTE,ATENDENTE', 'idempotente']);
+
+Route::middleware('auth:api')->group(function () {
+    Route::get('pedidos', [PedidoController::class, 'index']);
+    Route::get('pedidos/{id}', [PedidoController::class, 'show'])->whereNumber('id');
+});

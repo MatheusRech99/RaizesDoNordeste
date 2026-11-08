@@ -27,6 +27,12 @@ class PedidoResource extends JsonResource
                 'precoUnitario' => (float) $i->preco_unitario,
                 'subtotal' => (float) $i->subtotal,
             ])->all(),
+            'historico' => $this->whenLoaded('historico', fn () => $this->historico->map(fn ($h) => [
+                'statusAnterior' => $h->status_anterior?->value,
+                'statusNovo' => $h->status_novo->value,
+                'usuarioId' => $h->usuario_id,
+                'em' => $h->created_at->toIso8601String(),
+            ])->all()),
             'criadoEm' => $this->created_at->toIso8601String(),
         ];
     }

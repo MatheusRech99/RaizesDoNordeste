@@ -91,12 +91,22 @@ O saldo é lido com `SELECT ... FOR UPDATE` dentro de uma transação, e o banco
 | Método | Rota | Quem acessa | O que faz |
 | --- | --- | --- | --- |
 | POST | `/pedidos` | CLIENTE, ATENDENTE da unidade | cria o pedido (aceita `Idempotency-Key`) |
+| GET | `/pedidos` | qualquer perfil logado (com escopo) | lista paginada, mais novos primeiro |
+| GET | `/pedidos/{id}` | qualquer perfil logado (com escopo) | pedido com itens e histórico de status |
 
 Corpo: `canalPedido` (`APP`, `TOTEM`, `BALCAO`, `PICKUP` ou `WEB`), `unidadeId`, `itens` (`[{ "produtoId": 1, "quantidade": 2 }]`) e, só para o atendente, `clienteId`. Preço e total nunca vêm do cliente: o preço é o do cardápio da unidade no momento do pedido e fica gravado no item.
 
 - O cliente usa qualquer canal menos `BALCAO`, e o pedido é dele. O atendente só pede na própria unidade; no `BALCAO` o cliente é opcional, nos outros canais o `clienteId` é obrigatório.
 - O pedido nasce em `AGUARDANDO_PAGAMENTO`, com o estoque já baixado, histórico de status e auditoria, tudo numa transação. Se um item não tiver saldo, nada é gravado.
 - Erros: 422 corpo inválido (canal, itens vazios, quantidade, produto repetido); 404 unidade ou produto fora do cardápio; 409 `UNIDADE_FECHADA`, `PRODUTO_INDISPONIVEL` (desligado, fora do período sazonal ou inativo) e `ESTOQUE_INSUFICIENTE` (com o saldo de cada item em `details`).
+
+Consulta: `GET /pedidos` aceita `canalPedido`, `status`, `unidadeId`, `page` e `limit` (padrão 15, máximo 100). O que cada um vê:
+
+- CLIENTE: só os próprios pedidos (inclusive os que o atendente abriu no nome dele).
+- ATENDENTE, COZINHA e GERENTE: só os da sua unidade. Filtrar por outra unidade dá 403 `ACESSO_NEGADO`.
+- ADMIN: a rede toda.
+
+No detalhe, pedido de outro cliente ou inexistente dá o mesmo 404, para não revelar que existe; equipe de outra unidade leva 403.
 
 ## Idempotência
 
