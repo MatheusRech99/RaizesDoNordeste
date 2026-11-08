@@ -4,6 +4,7 @@ namespace App\Domain\Pedidos;
 
 use App\Domain\Exceptions\CodigoErro;
 use App\Domain\Exceptions\NegocioException;
+use App\Domain\Pagamentos\Pagamento;
 use App\Domain\Unidades\Unidade;
 use App\Domain\Usuarios\Perfil;
 use App\Domain\Usuarios\Usuario;
@@ -78,6 +79,11 @@ class Pedido extends Model
     public function itens(): HasMany
     {
         return $this->hasMany(ItemPedido::class);
+    }
+
+    public function pagamentos(): HasMany
+    {
+        return $this->hasMany(Pagamento::class);
     }
 
     public function historico(): HasMany

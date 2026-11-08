@@ -116,6 +116,21 @@ Status: `PATCH /pedidos/{id}/status` com `{ "status": "EM_PREPARO" }`. Só avan�
 - Só aceita `EM_PREPARO`, `PRONTO` e `ENTREGUE` (422 nos demais): `PAGO` vem do pagamento e `CANCELADO` do cancelamento.
 - Cada mudança grava histórico e auditoria na mesma transação, com lock no pedido para duas chamadas simultâneas não passarem pela mesma transição.
 
+## Pagamentos
+
+| Método | Rota | Quem acessa | O que faz |
+| --- | --- | --- | --- |
+| POST | `/pagamentos` | CLIENTE (dono do pedido), ATENDENTE da unidade | cobra o pedido no gateway (aceita `Idempotency-Key`) |
+
+Corpo: `pedidoId` e, opcionais, `valor` (se vier, tem que ser igual ao total do pedido) e `simularResultado`. O gateway é um mock (`MockPaymentGateway`, trocável pelo binding da interface `PaymentGateway` no `AppServiceProvider`).
+
+- `simularResultado` aceita `APROVADO`, `RECUSADO` ou `ERRO` e deixa o resultado do mock previsível. Sem ele, o mock aprova. Em produção (`APP_ENV=production`) o campo é recusado com 422.
+- `APROVADO`: 200, pagamento `APROVADO`, pedido vai para `PAGO`.
+- `RECUSADO`: 402 `PAGAMENTO_RECUSADO`. O pagamento fica `RECUSADO` e o pedido é cancelado (motivo `PAGAMENTO_RECUSADO`) com o estoque devolvido (movimentação `ESTORNO`).
+- `ERRO` (timeout, gateway fora): 503 `GATEWAY_INDISPONIVEL`. O pagamento fica `ERRO`, o pedido continua `AGUARDANDO_PAGAMENTO` e dá para tentar de novo; cada tentativa é uma linha em `pagamentos`.
+- Pedido fora de `AGUARDANDO_PAGAMENTO`, ou `valor` diferente do total: 409 `PEDIDO_NAO_PAGAVEL`. Pedido de outro cliente: 404; de outra unidade: 403.
+- A cobrança roda numa transação com lock no pedido, então duas chamadas ao mesmo tempo não cobram duas vezes. A resposta do gateway vira pagamento, histórico e auditoria na mesma transação.
+
 ## Idempotência
 
 `POST /pedidos` e `POST /pagamentos` aceitam o header `Idempotency-Key` (1 a 100 caracteres visíveis, sem espaço). A chave é opcional e vale por usuário, por rota e por 24 horas.

@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CardapioController;
 use App\Http\Controllers\Api\ClienteController;
 use App\Http\Controllers\Api\EstoqueController;
+use App\Http\Controllers\Api\PagamentoController;
 use App\Http\Controllers\Api\PedidoController;
 use App\Http\Controllers\Api\ProdutoController;
 use App\Http\Controllers\Api\UnidadeController;
@@ -58,3 +59,6 @@ Route::middleware('auth:api')->group(function () {
     Route::get('pedidos/{id}', [PedidoController::class, 'show'])->whereNumber('id');
     Route::patch('pedidos/{id}/status', [PedidoController::class, 'atualizarStatus'])->whereNumber('id')->middleware('perfil:COZINHA,ATENDENTE');
 });
+
+Route::post('pagamentos', [PagamentoController::class, 'store'])
+    ->middleware(['auth:api', 'perfil:CLIENTE,ATENDENTE', 'idempotente']);
