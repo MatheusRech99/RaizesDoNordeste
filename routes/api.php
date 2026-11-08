@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CardapioController;
+use App\Http\Controllers\Api\ClienteController;
 use App\Http\Controllers\Api\ProdutoController;
 use App\Http\Controllers\Api\UnidadeController;
 use Illuminate\Support\Facades\Route;
@@ -14,6 +15,13 @@ Route::prefix('auth')->group(function () {
         Route::post('logout', [AuthController::class, 'logout']);
         Route::get('me', [AuthController::class, 'me']);
     });
+});
+
+Route::post('clientes', [ClienteController::class, 'store']);
+Route::middleware(['auth:api', 'perfil:CLIENTE'])->prefix('clientes/me')->group(function () {
+    Route::get('consentimentos', [ClienteController::class, 'consentimentos']);
+    Route::delete('consentimentos/{finalidade}', [ClienteController::class, 'revogar'])
+        ->whereIn('finalidade', ['TERMOS', 'FIDELIDADE', 'MARKETING']);
 });
 
 Route::get('unidades', [UnidadeController::class, 'index']);

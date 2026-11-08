@@ -72,6 +72,18 @@ Corpo do `PUT` do cardápio: `preco` (obrigatório), `disponivel` (padrão `true
 
 Produto que exige cozinha completa não entra no cardápio de unidade reduzida, e a unidade não vira reduzida com um desses no cardápio (`PRODUTO_INCOMPATIVEL_COM_UNIDADE`).
 
+## Clientes e consentimentos (LGPD)
+
+| Método | Rota | Quem acessa | O que faz |
+| --- | --- | --- | --- |
+| POST | `/clientes` | público | cadastra o cliente com os consentimentos |
+| GET | `/clientes/me/consentimentos` | CLIENTE | consulta os próprios consentimentos |
+| DELETE | `/clientes/me/consentimentos/{finalidade}` | CLIENTE | revoga `FIDELIDADE` ou `MARKETING` |
+
+Corpo do `POST /clientes`: `nome`, `email`, `senha` (mínimo 8), `telefone` e `dataNascimento` (opcionais), `aceiteTermos` (obrigatório, `true`), `consentimentoFidelidade` e `consentimentoMarketing` (padrão `false`).
+
+Fidelidade e marketing são consentimentos separados. Cada um é gravado com a versão do termo (`LGPD_VERSAO_TERMO`), a data e o IP. A data de nascimento só é aceita junto com o consentimento de fidelidade e é apagada se ele for revogado. Ela nunca aparece nas respostas. Os termos não são revogáveis por essa rota (422).
+
 ## Usuários do seed
 
 `php artisan migrate --seed` cria 3 unidades, 9 produtos com cardápio e estes usuários (todos com a senha `senha123`, só para desenvolvimento):
@@ -82,7 +94,7 @@ Produto que exige cozinha completa não entra no cardápio de unidade reduzida, 
 | `gerente1@raizes.com`, `atendente1@raizes.com`, `cozinha1@raizes.com` | unidade 1 (Recife) |
 | `gerente2@raizes.com`, `atendente2@raizes.com`, `cozinha2@raizes.com` | unidade 2 (Fortaleza) |
 | `gerente3@raizes.com`, `atendente3@raizes.com`, `cozinha3@raizes.com` | unidade 3 (São Paulo) |
-| `cliente@raizes.com` | CLIENTE |
+| `cliente@raizes.com` | CLIENTE (com termos e fidelidade aceitos) |
 
 ## Testes
 

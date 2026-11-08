@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Application\Clientes\CadastrarCliente;
 use App\Domain\Unidades\Unidade;
 use App\Domain\Usuarios\Perfil;
 use App\Domain\Usuarios\Usuario;
@@ -39,11 +40,14 @@ class UsuarioSeeder extends Seeder
             }
         }
 
-        Usuario::create([
+        // passa pelo cadastro de verdade para ja ter os consentimentos gravados
+        app(CadastrarCliente::class)->executar([
             'nome' => 'Cliente Teste',
             'email' => 'cliente@raizes.com',
             'senha' => self::SENHA,
-            'perfil' => Perfil::CLIENTE,
-        ]);
+            'dataNascimento' => '1995-04-10',
+            'consentimentoFidelidade' => true,
+            'consentimentoMarketing' => false,
+        ], '127.0.0.1');
     }
 }
