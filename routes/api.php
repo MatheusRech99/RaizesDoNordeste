@@ -56,4 +56,5 @@ Route::post('pedidos', [PedidoController::class, 'store'])
 Route::middleware('auth:api')->group(function () {
     Route::get('pedidos', [PedidoController::class, 'index']);
     Route::get('pedidos/{id}', [PedidoController::class, 'show'])->whereNumber('id');
+    Route::patch('pedidos/{id}/status', [PedidoController::class, 'atualizarStatus'])->whereNumber('id')->middleware('perfil:COZINHA,ATENDENTE');
 });
