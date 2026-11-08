@@ -93,6 +93,7 @@ O saldo é lido com `SELECT ... FOR UPDATE` dentro de uma transação, e o banco
 | POST | `/pedidos` | CLIENTE, ATENDENTE da unidade | cria o pedido (aceita `Idempotency-Key`) |
 | GET | `/pedidos` | qualquer perfil logado (com escopo) | lista paginada, mais novos primeiro |
 | GET | `/pedidos/{id}` | qualquer perfil logado (com escopo) | pedido com itens e histórico de status |
+| PATCH | `/pedidos/{id}/status` | COZINHA, ATENDENTE da unidade | avança o status do pedido |
 
 Corpo: `canalPedido` (`APP`, `TOTEM`, `BALCAO`, `PICKUP` ou `WEB`), `unidadeId`, `itens` (`[{ "produtoId": 1, "quantidade": 2 }]`) e, só para o atendente, `clienteId`. Preço e total nunca vêm do cliente: o preço é o do cardápio da unidade no momento do pedido e fica gravado no item.
 
@@ -107,6 +108,13 @@ Consulta: `GET /pedidos` aceita `canalPedido`, `status`, `unidadeId`, `page` e `
 - ADMIN: a rede toda.
 
 No detalhe, pedido de outro cliente ou inexistente dá o mesmo 404, para não revelar que existe; equipe de outra unidade leva 403.
+
+Status: `PATCH /pedidos/{id}/status` com `{ "status": "EM_PREPARO" }`. Só avança pela máquina `AGUARDANDO_PAGAMENTO → PAGO → EM_PREPARO → PRONTO → ENTREGUE`.
+
+- A COZINHA move `PAGO → EM_PREPARO → PRONTO`; o ATENDENTE move `PRONTO → ENTREGUE`. Outro perfil, ou outra unidade, leva 403.
+- Pular etapa, voltar ou mexer em pedido já `ENTREGUE`/`CANCELADO` dá 409 `TRANSICAO_INVALIDA`, com `statusAtual` e `statusSolicitado` em `details`.
+- Só aceita `EM_PREPARO`, `PRONTO` e `ENTREGUE` (422 nos demais): `PAGO` vem do pagamento e `CANCELADO` do cancelamento.
+- Cada mudança grava histórico e auditoria na mesma transação, com lock no pedido para duas chamadas simultâneas não passarem pela mesma transição.
 
 ## Idempotência
 

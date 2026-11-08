@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Application\Pedidos\AtualizarStatusPedido;
 use App\Application\Pedidos\CriarPedido;
 use App\Domain\Exceptions\CodigoErro;
 use App\Domain\Exceptions\NegocioException;
 use App\Domain\Pedidos\Pedido;
+use App\Domain\Pedidos\StatusPedido;
 use App\Domain\Unidades\Unidade;
 use App\Domain\Usuarios\Perfil;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AtualizarStatusRequest;
 use App\Http\Requests\CriarPedidoRequest;
 use App\Http\Requests\ListarPedidosRequest;
 use App\Http\Resources\PedidoResource;
@@ -63,5 +66,18 @@ class PedidoController extends Controller
         Gate::authorize('ver', $pedido);
 
         return new PedidoResource($pedido);
+    }
+
+    public function atualizarStatus(int $id, AtualizarStatusRequest $request, AtualizarStatusPedido $atualizar)
+    {
+        $pedido = Pedido::find($id);
+        if (! $pedido) {
+            throw new NegocioException(CodigoErro::NAO_ENCONTRADO, 'Pedido não encontrado');
+        }
+
+        $novo = StatusPedido::from($request->validated('status'));
+        Gate::authorize('mudarStatus', [$pedido, $novo]);
+
+        return new PedidoResource($atualizar->executar(auth('api')->user(), $pedido, $novo));
     }
 }

@@ -2,6 +2,8 @@
 
 namespace App\Domain\Pedidos;
 
+use App\Domain\Exceptions\CodigoErro;
+use App\Domain\Exceptions\NegocioException;
 use App\Domain\Unidades\Unidade;
 use App\Domain\Usuarios\Perfil;
 use App\Domain\Usuarios\Usuario;
@@ -44,6 +46,23 @@ class Pedido extends Model
             Perfil::CLIENTE => $query->where('cliente_id', $usuario->id),
             default => $query->where('unidade_id', $usuario->unidade_id),
         };
+    }
+
+    // RN06: muda o status e grava o historico; quem chama abre a transacao e audita
+    public function transicionarPara(StatusPedido $novo, ?int $usuarioId): void
+    {
+        $antes = $this->status;
+
+        if (! $antes->podeIrPara($novo)) {
+            throw new NegocioException(
+                CodigoErro::TRANSICAO_INVALIDA,
+                "Não é possível ir de {$antes->value} para {$novo->value}",
+                [['statusAtual' => $antes->value, 'statusSolicitado' => $novo->value]],
+            );
+        }
+
+        $this->update(['status' => $novo]);
+        $this->historico()->create(['status_anterior' => $antes, 'status_novo' => $novo, 'usuario_id' => $usuarioId]);
     }
 
     public function unidade(): BelongsTo
