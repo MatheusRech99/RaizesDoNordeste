@@ -94,6 +94,7 @@ O saldo é lido com `SELECT ... FOR UPDATE` dentro de uma transação, e o banco
 | GET | `/pedidos` | qualquer perfil logado (com escopo) | lista paginada, mais novos primeiro |
 | GET | `/pedidos/{id}` | qualquer perfil logado (com escopo) | pedido com itens e histórico de status |
 | PATCH | `/pedidos/{id}/status` | COZINHA, ATENDENTE da unidade | avança o status do pedido |
+| POST | `/pedidos/{id}/cancelamento` | CLIENTE, ATENDENTE, GERENTE | cancela o pedido (corpo: `motivo`) |
 
 Corpo: `canalPedido` (`APP`, `TOTEM`, `BALCAO`, `PICKUP` ou `WEB`), `unidadeId`, `itens` (`[{ "produtoId": 1, "quantidade": 2 }]`) e, só para o atendente, `clienteId`. Preço e total nunca vêm do cliente: o preço é o do cardápio da unidade no momento do pedido e fica gravado no item.
 
@@ -115,6 +116,18 @@ Status: `PATCH /pedidos/{id}/status` com `{ "status": "EM_PREPARO" }`. Só avan�
 - Pular etapa, voltar ou mexer em pedido já `ENTREGUE`/`CANCELADO` dá 409 `TRANSICAO_INVALIDA`, com `statusAtual` e `statusSolicitado` em `details`.
 - Só aceita `EM_PREPARO`, `PRONTO` e `ENTREGUE` (422 nos demais): `PAGO` vem do pagamento e `CANCELADO` do cancelamento.
 - Cada mudança grava histórico e auditoria na mesma transação, com lock no pedido para duas chamadas simultâneas não passarem pela mesma transição.
+
+Cancelamento: `POST /pedidos/{id}/cancelamento` com `{ "motivo": "..." }` (3 a 255 caracteres). Até onde cada perfil cancela:
+
+| Perfil | Cancela pedido em |
+| --- | --- |
+| CLIENTE (só o dele) | `AGUARDANDO_PAGAMENTO` |
+| ATENDENTE da unidade | `AGUARDANDO_PAGAMENTO`, `PAGO` |
+| GERENTE da unidade | `AGUARDANDO_PAGAMENTO`, `PAGO`, `EM_PREPARO` |
+
+- Fora desses limites, 403 `ACESSO_NEGADO`. Pedido `PRONTO`, `ENTREGUE` ou já `CANCELADO` dá 409 `TRANSICAO_INVALIDA` para qualquer perfil. COZINHA e ADMIN não cancelam.
+- O estoque volta por movimentação `ESTORNO` e, se o pedido já estava pago, o pagamento vira `ESTORNADO` (estorno no gateway mock).
+- Tudo na mesma transação, com auditoria `CANCELAMENTO_PEDIDO`. Se o estorno falhar, 503 `GATEWAY_INDISPONIVEL` e o pedido fica como estava.
 
 ## Pagamentos
 

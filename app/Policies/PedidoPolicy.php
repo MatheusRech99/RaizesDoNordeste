@@ -37,4 +37,25 @@ class PedidoPolicy
             default => false,
         };
     }
+
+    // RF18: ate onde cada perfil cancela (cliente so antes de pagar, atendente ate PAGO, gerente ate EM_PREPARO)
+    public function cancelar(Usuario $usuario, Pedido $pedido): bool
+    {
+        $ate = match ($usuario->perfil) {
+            Perfil::CLIENTE => [StatusPedido::AGUARDANDO_PAGAMENTO],
+            Perfil::ATENDENTE => [StatusPedido::AGUARDANDO_PAGAMENTO, StatusPedido::PAGO],
+            Perfil::GERENTE => [StatusPedido::AGUARDANDO_PAGAMENTO, StatusPedido::PAGO, StatusPedido::EM_PREPARO],
+            default => [],
+        };
+
+        if (! in_array($pedido->status, $ate)) {
+            return false;
+        }
+
+        if ($usuario->perfil === Perfil::CLIENTE) {
+            return $pedido->cliente_id === $usuario->id;
+        }
+
+        return $usuario->unidade_id === $pedido->unidade_id;
+    }
 }
