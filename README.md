@@ -166,6 +166,19 @@ Corpo do `POST /clientes`: `nome`, `email`, `senha` (mínimo 8), `telefone` e `d
 
 Fidelidade e marketing são consentimentos separados. Cada um é gravado com a versão do termo (`LGPD_VERSAO_TERMO`), a data e o IP. A data de nascimento só é aceita junto com o consentimento de fidelidade e é apagada se ele for revogado. Ela nunca aparece nas respostas. Os termos não são revogáveis por essa rota (422).
 
+## Fidelidade
+
+| Método | Rota | Quem acessa | O que faz |
+| --- | --- | --- | --- |
+| GET | `/clientes/me/fidelidade/saldo` | CLIENTE | saldo de pontos |
+| GET | `/clientes/me/fidelidade/extrato` | CLIENTE | extrato paginado, mais novo primeiro |
+
+- 1 ponto por real inteiro do total do pedido (R$ 37,50 dão 37 pontos), creditado quando o pagamento é aprovado.
+- Só pontua quem tem o consentimento de fidelidade ativo na hora da aprovação. Pedido de balcão sem cliente e total abaixo de R$ 1,00 não pontuam; no pedido aberto pelo atendente, quem pontua é o cliente do pedido.
+- Cancelar um pedido que gerou pontos lança um `ESTORNO` com os pontos negativos, mesmo que o consentimento tenha sido revogado depois.
+- Não há coluna de saldo: o saldo é a soma da tabela `pontos_fidelidade` (créditos positivos, estornos negativos). `UNIQUE (pedido_id, tipo)` garante um crédito e um estorno por pedido.
+- Resgate e níveis de fidelidade ficam fora do MVP.
+
 ## Auditoria
 
 Operações sensíveis gravam um registro na tabela `auditoria` (quem, ação, entidade, dados antes e depois, IP e data) dentro da mesma transação da operação, então se a operação desfaz o registro some junto. Por enquanto são o cadastro de cliente e a revogação de consentimento; as demais entram com as etapas de pedido, estoque e cancelamento.

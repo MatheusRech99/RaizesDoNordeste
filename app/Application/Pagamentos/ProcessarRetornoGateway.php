@@ -2,6 +2,7 @@
 
 namespace App\Application\Pagamentos;
 
+use App\Application\Fidelidade\CreditarPontos;
 use App\Application\Pedidos\DevolverEstoque;
 use App\Domain\Auditoria\Acao;
 use App\Domain\Pagamentos\Pagamento;
@@ -16,6 +17,7 @@ class ProcessarRetornoGateway
 {
     public function __construct(
         private DevolverEstoque $devolverEstoque,
+        private CreditarPontos $creditarPontos,
         private AuditLogger $auditoria,
     ) {
     }
@@ -44,6 +46,7 @@ class ProcessarRetornoGateway
 
         if ($resposta->status === StatusPagamento::APROVADO) {
             $pedido->transicionarPara(StatusPedido::PAGO, $quem->id);
+            $this->creditarPontos->executar($pedido);
 
             return $pagamento;
         }

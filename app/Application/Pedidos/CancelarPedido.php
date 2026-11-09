@@ -2,6 +2,7 @@
 
 namespace App\Application\Pedidos;
 
+use App\Application\Fidelidade\EstornarPontos;
 use App\Domain\Auditoria\Acao;
 use App\Domain\Exceptions\CodigoErro;
 use App\Domain\Exceptions\NegocioException;
@@ -19,6 +20,7 @@ class CancelarPedido
 {
     public function __construct(
         private DevolverEstoque $devolverEstoque,
+        private EstornarPontos $estornarPontos,
         private PaymentGateway $gateway,
         private AuditLogger $auditoria,
     ) {
@@ -41,6 +43,7 @@ class CancelarPedido
             $this->devolverEstoque->executar($pedido, $quem, "Cancelamento do pedido #{$pedido->id}: {$motivo}");
 
             $estornou = $this->estornarPagamento($pedido, $quem);
+            $this->estornarPontos->executar($pedido);
 
             $this->auditoria->registrar(Acao::CANCELAMENTO_PEDIDO, $pedido, ['status' => $antes->value], [
                 'status' => 'CANCELADO',
