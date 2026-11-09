@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CardapioController;
 use App\Http\Controllers\Api\ClienteController;
 use App\Http\Controllers\Api\EstoqueController;
+use App\Http\Controllers\Api\FidelidadeController;
 use App\Http\Controllers\Api\PagamentoController;
 use App\Http\Controllers\Api\PedidoController;
 use App\Http\Controllers\Api\ProdutoController;
@@ -25,6 +26,8 @@ Route::middleware(['auth:api', 'perfil:CLIENTE'])->prefix('clientes/me')->group(
     Route::get('consentimentos', [ClienteController::class, 'consentimentos']);
     Route::delete('consentimentos/{finalidade}', [ClienteController::class, 'revogar'])
         ->whereIn('finalidade', ['TERMOS', 'FIDELIDADE', 'MARKETING']);
+    Route::get('fidelidade/saldo', [FidelidadeController::class, 'saldo']);
+    Route::get('fidelidade/extrato', [FidelidadeController::class, 'extrato']);
 });
 
 Route::get('unidades', [UnidadeController::class, 'index']);
