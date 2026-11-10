@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AuditoriaController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CardapioController;
 use App\Http\Controllers\Api\ClienteController;
@@ -29,6 +30,12 @@ Route::middleware(['auth:api', 'perfil:CLIENTE'])->prefix('clientes/me')->group(
     Route::get('fidelidade/saldo', [FidelidadeController::class, 'saldo']);
     Route::get('fidelidade/extrato', [FidelidadeController::class, 'extrato']);
 });
+
+Route::get('clientes/{id}', [ClienteController::class, 'show'])
+    ->whereNumber('id')
+    ->middleware(['auth:api', 'perfil:ADMIN,GERENTE,ATENDENTE']);
+
+Route::get('auditoria', [AuditoriaController::class, 'index'])->middleware(['auth:api', 'perfil:ADMIN']);
 
 Route::get('unidades', [UnidadeController::class, 'index']);
 Route::get('unidades/{id}', [UnidadeController::class, 'show'])->whereNumber('id');

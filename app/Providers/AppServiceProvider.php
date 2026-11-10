@@ -6,7 +6,9 @@ use App\Domain\Pagamentos\PaymentGateway;
 use App\Domain\Pedidos\Pedido;
 use App\Infrastructure\Pagamentos\MockPaymentGateway;
 use App\Domain\Unidades\Unidade;
+use App\Domain\Usuarios\Usuario;
 use App\Policies\PedidoPolicy;
+use App\Policies\UsuarioPolicy;
 use App\Policies\UnidadePolicy;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
@@ -22,5 +24,6 @@ class AppServiceProvider extends ServiceProvider
     {
         Gate::policy(Unidade::class, UnidadePolicy::class);
         Gate::policy(Pedido::class, PedidoPolicy::class);
+        Gate::policy(Usuario::class, UsuarioPolicy::class);
     }
 }
