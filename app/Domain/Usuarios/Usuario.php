@@ -40,6 +40,44 @@ class Usuario extends Authenticatable implements JWTSubject
         return $this->hasMany(Consentimento::class);
     }
 
+    // RNF04: perfil interno ve o e-mail e o telefone mascarados
+    public function emailMascarado(): string
+    {
+        [$usuario, $dominio] = explode('@', $this->email, 2) + [1 => ''];
+
+        return substr($usuario, 0, 1).'***@'.$dominio;
+    }
+
+    public function telefoneMascarado(): ?string
+    {
+        if (! $this->telefone) {
+            return null;
+        }
+
+        $digitos = preg_replace('/\D/', '', $this->telefone);
+
+        return str_repeat('*', max(strlen($digitos) - 4, 0)).substr($digitos, -4);
+    }
+
+    // a data de nascimento nunca sai; so a faixa (RNF04)
+    public function faixaEtaria(): ?string
+    {
+        if (! $this->data_nascimento) {
+            return null;
+        }
+
+        $idade = $this->data_nascimento->age;
+
+        return match (true) {
+            $idade < 18 => 'ATE_17',
+            $idade < 25 => '18_24',
+            $idade < 35 => '25_34',
+            $idade < 45 => '35_44',
+            $idade < 55 => '45_54',
+            default => '55_MAIS',
+        };
+    }
+
     public function temConsentimento(Finalidade $finalidade): bool
     {
         return $this->consentimentos()

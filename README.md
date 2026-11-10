@@ -161,10 +161,13 @@ As chaves vencidas são limpas pelo agendador (`php artisan schedule:work` em de
 | POST | `/clientes` | público | cadastra o cliente com os consentimentos |
 | GET | `/clientes/me/consentimentos` | CLIENTE | consulta os próprios consentimentos |
 | DELETE | `/clientes/me/consentimentos/{finalidade}` | CLIENTE | revoga `FIDELIDADE` ou `MARKETING` |
+| GET | `/clientes/{id}` | ADMIN, GERENTE, ATENDENTE | dados do cliente para a equipe (mascarados) |
 
 Corpo do `POST /clientes`: `nome`, `email`, `senha` (mínimo 8), `telefone` e `dataNascimento` (opcionais), `aceiteTermos` (obrigatório, `true`), `consentimentoFidelidade` e `consentimentoMarketing` (padrão `false`).
 
 Fidelidade e marketing são consentimentos separados. Cada um é gravado com a versão do termo (`LGPD_VERSAO_TERMO`), a data e o IP. A data de nascimento só é aceita junto com o consentimento de fidelidade e é apagada se ele for revogado. Ela nunca aparece nas respostas. Os termos não são revogáveis por essa rota (422).
+
+Visão da equipe (`GET /clientes/{id}`): o e-mail sai mascarado (`m***@exemplo.com`), o telefone mostra só os 4 últimos dígitos (`*******1234`) e no lugar da data de nascimento vai a faixa etária (`ATE_17`, `18_24`, `25_34`, `35_44`, `45_54`, `55_MAIS`). A matriz vê qualquer cliente; GERENTE e ATENDENTE só quem já fez pedido na unidade deles (senão 403); COZINHA não acessa. Cada leitura grava `ACESSO_DADOS_PESSOAIS` na auditoria antes de devolver a resposta; se a gravação falhar, nada é devolvido.
 
 ## Fidelidade
 
@@ -181,9 +184,11 @@ Fidelidade e marketing são consentimentos separados. Cada um é gravado com a v
 
 ## Auditoria
 
-Operações sensíveis gravam um registro na tabela `auditoria` (quem, ação, entidade, dados antes e depois, IP e data) dentro da mesma transação da operação, então se a operação desfaz o registro some junto. Por enquanto são o cadastro de cliente e a revogação de consentimento; as demais entram com as etapas de pedido, estoque e cancelamento.
+Operações sensíveis gravam um registro na tabela `auditoria` (quem, ação, entidade, dados antes e depois, IP e data) dentro da mesma transação da operação, então se a operação desfaz o registro some junto. Ações registradas: `CADASTRO_CLIENTE`, `REVOGACAO_CONSENTIMENTO`, `AJUSTE_ESTOQUE`, `CRIACAO_PEDIDO`, `ATUALIZACAO_STATUS_PEDIDO`, `PAGAMENTO_PEDIDO`, `CANCELAMENTO_PEDIDO` e `ACESSO_DADOS_PESSOAIS`.
 
-A tabela só aceita INSERT: o model lança exceção em `update`/`delete` e o banco tem triggers que barram qualquer alteração ou exclusão direta. Dados como senha e data de nascimento nunca entram nos registros.
+A tabela só aceita INSERT: o model lança exceção em `update`/`delete` e o banco tem triggers que barram qualquer alteração ou exclusão direta. Dados como senha e data de nascimento nunca entram nos registros, e o acesso a dados pessoais guarda só quais campos foram lidos, não os valores.
+
+`GET /auditoria` (só ADMIN) lista a trilha paginada, do mais novo para o mais antigo. Filtros: `acao`, `entidade`, `entidadeId`, `usuarioId`, `de` e `ate` (datas `AAAA-MM-DD`, o dia inteiro conta). Não existe rota para alterar ou apagar registros.
 
 ## Usuários do seed
 
