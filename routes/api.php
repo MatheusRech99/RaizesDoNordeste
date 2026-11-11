@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\FidelidadeController;
 use App\Http\Controllers\Api\PagamentoController;
 use App\Http\Controllers\Api\PedidoController;
 use App\Http\Controllers\Api\ProdutoController;
+use App\Http\Controllers\Api\RelatorioController;
 use App\Http\Controllers\Api\UnidadeController;
 use Illuminate\Support\Facades\Route;
 
@@ -34,6 +35,11 @@ Route::middleware(['auth:api', 'perfil:CLIENTE'])->prefix('clientes/me')->group(
 Route::get('clientes/{id}', [ClienteController::class, 'show'])
     ->whereNumber('id')
     ->middleware(['auth:api', 'perfil:ADMIN,GERENTE,ATENDENTE']);
+
+Route::middleware(['auth:api', 'perfil:ADMIN,GERENTE'])->prefix('relatorios')->group(function () {
+    Route::get('vendas', [RelatorioController::class, 'vendas']);
+    Route::get('produtos-mais-vendidos', [RelatorioController::class, 'produtosMaisVendidos']);
+});
 
 Route::get('auditoria', [AuditoriaController::class, 'index'])->middleware(['auth:api', 'perfil:ADMIN']);
 
