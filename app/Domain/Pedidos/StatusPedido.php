@@ -11,6 +11,12 @@ enum StatusPedido: string
     case ENTREGUE = 'ENTREGUE';
     case CANCELADO = 'CANCELADO';
 
+    // o que entra nos relatorios de venda: pago e nao cancelado
+    public static function vendas(): array
+    {
+        return [self::PAGO, self::EM_PREPARO, self::PRONTO, self::ENTREGUE];
+    }
+
     // RN06: so as setas da maquina de status
     public function podeIrPara(StatusPedido $novo): bool
     {

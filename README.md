@@ -182,6 +182,19 @@ Visão da equipe (`GET /clientes/{id}`): o e-mail sai mascarado (`m***@exemplo.c
 - Não há coluna de saldo: o saldo é a soma da tabela `pontos_fidelidade` (créditos positivos, estornos negativos). `UNIQUE (pedido_id, tipo)` garante um crédito e um estorno por pedido.
 - Resgate e níveis de fidelidade ficam fora do MVP.
 
+## Relatórios
+
+| Método | Rota | Quem acessa | O que faz |
+| --- | --- | --- | --- |
+| GET | `/relatorios/vendas` | ADMIN, GERENTE (só a sua unidade) | vendas agrupadas por unidade, região ou canal |
+| GET | `/relatorios/produtos-mais-vendidos` | ADMIN, GERENTE (só a sua unidade) | ranking de produtos por quantidade |
+
+- `de` e `ate` (`AAAA-MM-DD`) são obrigatórios e o período vai até 366 dias; os dois dias contam inteiros. Sem período ou com período maior, 422. É o que mantém a consulta barata para a operação das lojas (índice em `pedidos (created_at, status)`).
+- Entram só pedidos vendidos: `PAGO`, `EM_PREPARO`, `PRONTO` e `ENTREGUE`, pela data de criação. `AGUARDANDO_PAGAMENTO` e `CANCELADO` ficam de fora.
+- Filtros: `unidadeId`, `regiao` (`NE`, `SE`, `S`, `CO`, `N`) e, nas vendas, `canalPedido`. `agruparPor` aceita `unidade` (padrão), `regiao` ou `canal`. As linhas vêm paginadas (`page`, `limit`), mas `totais` (pedidos, faturamento e ticket médio) cobre todas.
+- O ranking traz `posicao`, `quantidade`, `faturamento` e número de `pedidos` por produto.
+- O GERENTE só enxerga a própria unidade; pedir outra `unidadeId` dá 403. Os relatórios não trazem nenhum dado de cliente.
+
 ## Auditoria
 
 Operações sensíveis gravam um registro na tabela `auditoria` (quem, ação, entidade, dados antes e depois, IP e data) dentro da mesma transação da operação, então se a operação desfaz o registro some junto. Ações registradas: `CADASTRO_CLIENTE`, `REVOGACAO_CONSENTIMENTO`, `AJUSTE_ESTOQUE`, `CRIACAO_PEDIDO`, `ATUALIZACAO_STATUS_PEDIDO`, `PAGAMENTO_PEDIDO`, `CANCELAMENTO_PEDIDO` e `ACESSO_DADOS_PESSOAIS`.
