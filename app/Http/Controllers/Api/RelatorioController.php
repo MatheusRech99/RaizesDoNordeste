@@ -10,6 +10,11 @@ use App\Http\Requests\RelatorioVendasRequest;
 
 class RelatorioController extends Controller
 {
+    /**
+     * Vendas no período
+     *
+     * ADMIN e GERENTE (só a sua unidade; outra unidade: 403). `de` e `ate` são obrigatórios (até 366 dias). Conta pedidos `PAGO`, `EM_PREPARO`, `PRONTO` e `ENTREGUE`. Agrupa por `unidade` (padrão), `regiao` ou `canal`; `totais` cobre todos os grupos.
+     */
     public function vendas(RelatorioVendasRequest $request, RelatorioVendas $relatorio)
     {
         $r = $relatorio->executar(auth('api')->user(), $request->validated(), $request->limite());
@@ -35,6 +40,11 @@ class RelatorioController extends Controller
         ]);
     }
 
+    /**
+     * Ranking de produtos mais vendidos
+     *
+     * ADMIN e GERENTE (só a sua unidade). Ordenado por quantidade, no período informado.
+     */
     public function produtosMaisVendidos(RelatorioRequest $request, RankingProdutos $ranking)
     {
         $pagina = $ranking->executar(auth('api')->user(), $request->validated(), $request->limite());

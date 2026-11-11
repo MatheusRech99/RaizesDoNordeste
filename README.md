@@ -32,6 +32,13 @@ php artisan migrate --seed
 php artisan serve
 ```
 
+## Documentação da API (OpenAPI)
+
+A spec é gerada a partir do código (rotas, Form Requests e Resources) com o [Scramble](https://scramble.dedoc.co) e fica versionada em `docs/openapi.json` (OpenAPI 3.1).
+
+- Swagger/Elements interativo: suba a API (`php artisan serve`) e abra `http://localhost:8000/docs/api`. Para testar rotas protegidas, faça login em `POST /auth/login` e cole o `accessToken` em Authorization (Bearer). O JSON também sai em `/docs/api.json`. As duas rotas só respondem com `APP_ENV=local`. O "Try It" chama o mesmo host e porta de onde a página foi aberta; se aparecer "Network Error", confira se a API está no ar nesse endereço (`php artisan serve --port=8001` muda a porta e a página acompanha).
+- Cada operação traz resumo, quem acessa e os códigos de erro de negócio na descrição. As falhas seguem o schema `Erro` (`error`, `message`, `details`, `timestamp`, `path`, `requestId`) e `POST /pedidos` e `POST /pagamentos` listam o header `Idempotency-Key`.
+
 ## Autenticação
 
 JWT com expiração de 60 minutos. O token vai no header `Authorization: Bearer <token>`.

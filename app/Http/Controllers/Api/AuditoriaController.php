@@ -10,6 +10,11 @@ use App\Http\Resources\AuditoriaResource;
 class AuditoriaController extends Controller
 {
     // RF28: so a matriz consulta a trilha
+    /**
+     * Consulta a trilha de auditoria
+     *
+     * Só ADMIN. Do mais novo para o mais antigo. Não há rota para alterar ou apagar registros.
+     */
     public function index(ListarAuditoriaRequest $request)
     {
         $lista = RegistroAuditoria::query()

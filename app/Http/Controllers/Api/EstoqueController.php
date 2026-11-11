@@ -17,6 +17,11 @@ use Illuminate\Support\Facades\Gate;
 
 class EstoqueController extends Controller
 {
+    /**
+     * Saldo de estoque da unidade
+     *
+     * ADMIN em qualquer unidade; GERENTE e ATENDENTE só na sua (403).
+     */
     public function index(int $id, ListagemRequest $request)
     {
         $unidade = Unidade::ativaOuFalha($id);
@@ -32,6 +37,11 @@ class EstoqueController extends Controller
         return EstoqueResource::collection($saldos);
     }
 
+    /**
+     * Histórico de movimentações
+     *
+     * Mesmo escopo do saldo. Filtros por produto e tipo.
+     */
     public function movimentacoes(int $id, MovimentacoesRequest $request)
     {
         $unidade = Unidade::ativaOuFalha($id);
@@ -53,6 +63,11 @@ class EstoqueController extends Controller
         return MovimentacaoEstoqueResource::collection($lista);
     }
 
+    /**
+     * Registra entrada, saída ou ajuste
+     *
+     * Só o GERENTE da unidade. A quantidade é positiva em `ENTRADA` e `SAIDA` e vem com sinal no `AJUSTE`. Saldo ficaria negativo: 409 `ESTOQUE_INSUFICIENTE`. Gera auditoria.
+     */
     public function movimentar(int $id, MovimentarEstoqueRequest $request, MovimentarEstoque $movimentar)
     {
         $unidade = Unidade::ativaOuFalha($id);

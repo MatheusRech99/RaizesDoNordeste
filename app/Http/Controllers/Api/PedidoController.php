@@ -21,6 +21,13 @@ use Illuminate\Support\Facades\Gate;
 
 class PedidoController extends Controller
 {
+    /**
+     * Cria pedido
+     *
+     * CLIENTE (qualquer canal menos `BALCAO`, e o pedido é dele) ou ATENDENTE da unidade (`clienteId` obrigatório fora do `BALCAO`). Aceita `Idempotency-Key`. O preço e o total vêm sempre do cardápio, o estoque é baixado na mesma transação e o pedido nasce em `AGUARDANDO_PAGAMENTO`.
+     *
+     * Erros: 404 `UNIDADE_NAO_ENCONTRADA` ou `PRODUTO_NAO_ENCONTRADO`; 409 `UNIDADE_FECHADA`, `PRODUTO_INDISPONIVEL`, `ESTOQUE_INSUFICIENTE` (todos os itens sem saldo em `details`) e `CHAVE_IDEMPOTENCIA_CONFLITANTE`.
+     */
     public function store(CriarPedidoRequest $request, CriarPedido $criar)
     {
         $unidade = Unidade::ativaOuFalha($request->integer('unidadeId'));
@@ -36,6 +43,11 @@ class PedidoController extends Controller
         return (new PedidoResource($pedido))->response()->setStatusCode(201);
     }
 
+    /**
+     * Lista pedidos
+     *
+     * CLIENTE vê só os próprios; ATENDENTE, COZINHA e GERENTE só os da unidade (filtrar outra unidade: 403); ADMIN vê a rede toda. Do mais novo para o mais antigo.
+     */
     public function index(ListarPedidosRequest $request)
     {
         $usuario = auth('api')->user();
@@ -58,6 +70,11 @@ class PedidoController extends Controller
         return PedidoResource::collection($pedidos);
     }
 
+    /**
+     * Consulta pedido com histórico de status
+     *
+     * Pedido de outro cliente ou inexistente: 404 `NAO_ENCONTRADO`. Equipe de outra unidade: 403.
+     */
     public function show(int $id)
     {
         $pedido = Pedido::with(['itens.produto', 'historico'])->find($id);
@@ -70,6 +87,11 @@ class PedidoController extends Controller
         return new PedidoResource($pedido);
     }
 
+    /**
+     * Avança o status do pedido
+     *
+     * COZINHA move `PAGO` → `EM_PREPARO` → `PRONTO`; ATENDENTE move `PRONTO` → `ENTREGUE`, sempre na própria unidade (senão 403). Transição fora da máquina de status: 409 `TRANSICAO_INVALIDA`. `PAGO` e `CANCELADO` não passam por aqui.
+     */
     public function atualizarStatus(int $id, AtualizarStatusRequest $request, AtualizarStatusPedido $atualizar)
     {
         $pedido = Pedido::find($id);
@@ -83,6 +105,11 @@ class PedidoController extends Controller
         return new PedidoResource($atualizar->executar(auth('api')->user(), $pedido, $novo));
     }
 
+    /**
+     * Cancela o pedido
+     *
+     * CLIENTE (só o dele) cancela em `AGUARDANDO_PAGAMENTO`; ATENDENTE até `PAGO`; GERENTE até `EM_PREPARO`. Devolve o estoque, estorna o pagamento e os pontos e grava auditoria. Fora do limite do perfil: 403. Pedido `PRONTO`, `ENTREGUE` ou já cancelado: 409 `TRANSICAO_INVALIDA`. Falha no estorno do gateway: 503 `GATEWAY_INDISPONIVEL` (nada é cancelado).
+     */
     public function cancelar(int $id, CancelarPedidoRequest $request, CancelarPedido $cancelar)
     {
         $pedido = Pedido::find($id);

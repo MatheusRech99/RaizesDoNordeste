@@ -5,6 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/** @mixin \App\Domain\Fidelidade\PontosFidelidade */
 class PontosResource extends JsonResource
 {
     public function toArray(Request $request): array
