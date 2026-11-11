@@ -12,6 +12,11 @@ use Illuminate\Support\Facades\Gate;
 
 class UnidadeController extends Controller
 {
+    /**
+     * Lista as unidades ativas
+     *
+     * Público, paginado.
+     */
     public function index(ListagemRequest $request)
     {
         $unidades = Unidade::with('horarios')
@@ -22,6 +27,11 @@ class UnidadeController extends Controller
         return UnidadeResource::collection($unidades);
     }
 
+    /**
+     * Detalha uma unidade
+     *
+     * Público. Traz formato e horários de funcionamento. Unidade inexistente ou inativa: 404 `UNIDADE_NAO_ENCONTRADA`.
+     */
     public function show(int $id)
     {
         $unidade = Unidade::ativaOuFalha($id)->load('horarios');
@@ -29,6 +39,11 @@ class UnidadeController extends Controller
         return new UnidadeResource($unidade);
     }
 
+    /**
+     * Atualiza formato e horários
+     *
+     * ADMIN em qualquer unidade, GERENTE só na sua (403). Trocar para formato `REDUZIDO` com produto que exige cozinha completa no cardápio: 422 `PRODUTO_INCOMPATIVEL_COM_UNIDADE`.
+     */
     public function update(int $id, AtualizarUnidadeRequest $request, ConfigurarUnidade $configurar)
     {
         $unidade = Unidade::ativaOuFalha($id);

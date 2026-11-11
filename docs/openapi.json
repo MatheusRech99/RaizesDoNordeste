@@ -1,0 +1,4051 @@
+{
+    "openapi": "3.1.2",
+    "info": {
+        "title": "API Ra\u00edzes do Nordeste",
+        "version": "1.0.0",
+        "description": "API REST \u00fanica para os canais APP, TOTEM, BALCAO, PICKUP e WEB. Autentica\u00e7\u00e3o por JWT (header `Authorization: Bearer <token>`). Toda falha segue o formato do schema `Erro`."
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8000",
+            "description": "Mesmo endere\u00e7o desta p\u00e1gina"
+        }
+    ],
+    "security": [
+        {
+            "http": []
+        }
+    ],
+    "paths": {
+        "/auditoria": {
+            "get": {
+                "operationId": "auditoria.index",
+                "description": "S\u00f3 ADMIN. Do mais novo para o mais antigo. N\u00e3o h\u00e1 rota para alterar ou apagar registros.",
+                "summary": "Consulta a trilha de auditoria",
+                "tags": [
+                    "Auditoria"
+                ],
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 100
+                        }
+                    },
+                    {
+                        "name": "acao",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "CADASTRO_CLIENTE",
+                                "REVOGACAO_CONSENTIMENTO",
+                                "AJUSTE_ESTOQUE",
+                                "CRIACAO_PEDIDO",
+                                "ATUALIZACAO_STATUS_PEDIDO",
+                                "PAGAMENTO_PEDIDO",
+                                "CANCELAMENTO_PEDIDO",
+                                "ACESSO_DADOS_PESSOAIS"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "entidade",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 60
+                        }
+                    },
+                    {
+                        "name": "entidadeId",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "usuarioId",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "de",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "ate",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated set of `AuditoriaResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/AuditoriaResource"
+                                            }
+                                        },
+                                        "links": {
+                                            "type": "object",
+                                            "properties": {
+                                                "first": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "last": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "prev": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "next": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "first",
+                                                "last",
+                                                "prev",
+                                                "next"
+                                            ]
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer",
+                                                    "minimum": 1
+                                                },
+                                                "from": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "minimum": 1
+                                                },
+                                                "last_page": {
+                                                    "type": "integer",
+                                                    "minimum": 1
+                                                },
+                                                "links": {
+                                                    "type": "array",
+                                                    "description": "Generated paginator links.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "url": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            },
+                                                            "active": {
+                                                                "type": "boolean"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "url",
+                                                            "label",
+                                                            "active"
+                                                        ]
+                                                    }
+                                                },
+                                                "path": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "description": "Base path for paginator generated URLs."
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "description": "Number of items shown per page.",
+                                                    "minimum": 0
+                                                },
+                                                "to": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "description": "Number of the last item in the slice.",
+                                                    "minimum": 1
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "description": "Total number of items being paginated.",
+                                                    "minimum": 0
+                                                }
+                                            },
+                                            "required": [
+                                                "current_page",
+                                                "from",
+                                                "last_page",
+                                                "links",
+                                                "path",
+                                                "per_page",
+                                                "to",
+                                                "total"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "links",
+                                        "meta"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/auth/login": {
+            "post": {
+                "operationId": "auth.login",
+                "description": "Devolve o token JWT (v\u00e1lido por 60 minutos). Credenciais erradas: 401 `NAO_AUTENTICADO`.",
+                "summary": "Login",
+                "tags": [
+                    "Auth"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LoginRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "accessToken": {
+                                            "type": "string"
+                                        },
+                                        "tokenType": {
+                                            "type": "string",
+                                            "const": "Bearer"
+                                        },
+                                        "expiresIn": {
+                                            "type": "number"
+                                        }
+                                    },
+                                    "required": [
+                                        "accessToken",
+                                        "tokenType",
+                                        "expiresIn"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                },
+                "security": []
+            }
+        },
+        "/auth/refresh": {
+            "post": {
+                "operationId": "auth.refresh",
+                "description": "Aceita um token j\u00e1 expirado dentro da janela de renova\u00e7\u00e3o e devolve outro.",
+                "summary": "Renova o token",
+                "tags": [
+                    "Auth"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "accessToken": {
+                                            "type": "string"
+                                        },
+                                        "tokenType": {
+                                            "type": "string",
+                                            "const": "Bearer"
+                                        },
+                                        "expiresIn": {
+                                            "type": "number"
+                                        }
+                                    },
+                                    "required": [
+                                        "accessToken",
+                                        "tokenType",
+                                        "expiresIn"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/logout": {
+            "post": {
+                "operationId": "auth.logout",
+                "description": "Invalida o token atual.",
+                "summary": "Logout",
+                "tags": [
+                    "Auth"
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No content"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/auth/me": {
+            "get": {
+                "operationId": "auth.me",
+                "description": "Dados do pr\u00f3prio usu\u00e1rio, sem senha nem data de nascimento.",
+                "summary": "Usu\u00e1rio logado",
+                "tags": [
+                    "Auth"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`UsuarioResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/UsuarioResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/unidades/{id}/cardapio": {
+            "get": {
+                "operationId": "cardapio.index",
+                "description": "P\u00fablico. S\u00f3 aparecem itens dispon\u00edveis e dentro do per\u00edodo sazonal na data (`data`, padr\u00e3o hoje).",
+                "summary": "Card\u00e1pio da unidade",
+                "tags": [
+                    "Cardapio"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 100
+                        }
+                    },
+                    {
+                        "name": "data",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated set of `ItemCardapioResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/ItemCardapioResource"
+                                            }
+                                        },
+                                        "links": {
+                                            "type": "object",
+                                            "properties": {
+                                                "first": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "last": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "prev": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "next": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "first",
+                                                "last",
+                                                "prev",
+                                                "next"
+                                            ]
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer",
+                                                    "minimum": 1
+                                                },
+                                                "from": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "minimum": 1
+                                                },
+                                                "last_page": {
+                                                    "type": "integer",
+                                                    "minimum": 1
+                                                },
+                                                "links": {
+                                                    "type": "array",
+                                                    "description": "Generated paginator links.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "url": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            },
+                                                            "active": {
+                                                                "type": "boolean"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "url",
+                                                            "label",
+                                                            "active"
+                                                        ]
+                                                    }
+                                                },
+                                                "path": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "description": "Base path for paginator generated URLs."
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "description": "Number of items shown per page.",
+                                                    "minimum": 0
+                                                },
+                                                "to": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "description": "Number of the last item in the slice.",
+                                                    "minimum": 1
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "description": "Total number of items being paginated.",
+                                                    "minimum": 0
+                                                }
+                                            },
+                                            "required": [
+                                                "current_page",
+                                                "from",
+                                                "last_page",
+                                                "links",
+                                                "path",
+                                                "per_page",
+                                                "to",
+                                                "total"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "links",
+                                        "meta"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                },
+                "security": []
+            }
+        },
+        "/unidades/{id}/cardapio/{produtoId}": {
+            "put": {
+                "operationId": "cardapio.salvar",
+                "description": "S\u00f3 o GERENTE da unidade. Produto que exige cozinha completa em unidade `REDUZIDA`: 422 `PRODUTO_INCOMPATIVEL_COM_UNIDADE`. Produto inexistente: 404 `PRODUTO_NAO_ENCONTRADO`.",
+                "summary": "Inclui ou atualiza item do card\u00e1pio",
+                "tags": [
+                    "Cardapio"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "produtoId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ItemCardapioRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "`ItemCardapioResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/ItemCardapioResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/clientes": {
+            "post": {
+                "operationId": "cliente.store",
+                "description": "P\u00fablico. `aceiteTermos` \u00e9 obrigat\u00f3rio; fidelidade e marketing s\u00e3o consentimentos separados. A data de nascimento s\u00f3 vale com consentimento de fidelidade.",
+                "summary": "Cadastra cliente",
+                "tags": [
+                    "Cliente"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CadastroClienteRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "`UsuarioResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/components/schemas/UsuarioResource"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "required": [
+                                                        "consentimentos"
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                },
+                "security": []
+            }
+        },
+        "/clientes/me/consentimentos": {
+            "get": {
+                "operationId": "cliente.consentimentos",
+                "description": "S\u00f3 CLIENTE.",
+                "summary": "Meus consentimentos",
+                "tags": [
+                    "Cliente"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Array of `ConsentimentoResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/ConsentimentoResource"
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/clientes/me/consentimentos/{finalidade}": {
+            "delete": {
+                "operationId": "cliente.revogar",
+                "description": "S\u00f3 CLIENTE. `FIDELIDADE` ou `MARKETING` (os termos n\u00e3o se revogam: 422). Revogar fidelidade apaga a data de nascimento. 404 se n\u00e3o h\u00e1 consentimento ativo.",
+                "summary": "Revoga consentimento",
+                "tags": [
+                    "Cliente"
+                ],
+                "parameters": [
+                    {
+                        "name": "finalidade",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`ConsentimentoResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/ConsentimentoResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/clientes/{id}": {
+            "get": {
+                "operationId": "cliente.show",
+                "description": "ADMIN (qualquer cliente), GERENTE e ATENDENTE (s\u00f3 quem j\u00e1 pediu na unidade, sen\u00e3o 403). E-mail e telefone saem mascarados e no lugar da data de nascimento vai a faixa et\u00e1ria. Cada leitura grava `ACESSO_DADOS_PESSOAIS` na auditoria.",
+                "summary": "Dados do cliente para a equipe",
+                "tags": [
+                    "Cliente"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`ClienteResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/ClienteResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/unidades/{id}/estoque": {
+            "get": {
+                "operationId": "estoque.index",
+                "description": "ADMIN em qualquer unidade; GERENTE e ATENDENTE s\u00f3 na sua (403).",
+                "summary": "Saldo de estoque da unidade",
+                "tags": [
+                    "Estoque"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 100
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated set of `EstoqueResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/EstoqueResource"
+                                            }
+                                        },
+                                        "links": {
+                                            "type": "object",
+                                            "properties": {
+                                                "first": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "last": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "prev": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "next": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "first",
+                                                "last",
+                                                "prev",
+                                                "next"
+                                            ]
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer",
+                                                    "minimum": 1
+                                                },
+                                                "from": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "minimum": 1
+                                                },
+                                                "last_page": {
+                                                    "type": "integer",
+                                                    "minimum": 1
+                                                },
+                                                "links": {
+                                                    "type": "array",
+                                                    "description": "Generated paginator links.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "url": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            },
+                                                            "active": {
+                                                                "type": "boolean"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "url",
+                                                            "label",
+                                                            "active"
+                                                        ]
+                                                    }
+                                                },
+                                                "path": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "description": "Base path for paginator generated URLs."
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "description": "Number of items shown per page.",
+                                                    "minimum": 0
+                                                },
+                                                "to": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "description": "Number of the last item in the slice.",
+                                                    "minimum": 1
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "description": "Total number of items being paginated.",
+                                                    "minimum": 0
+                                                }
+                                            },
+                                            "required": [
+                                                "current_page",
+                                                "from",
+                                                "last_page",
+                                                "links",
+                                                "path",
+                                                "per_page",
+                                                "to",
+                                                "total"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "links",
+                                        "meta"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/unidades/{id}/estoque/movimentacoes": {
+            "get": {
+                "operationId": "estoque.movimentacoes",
+                "description": "Mesmo escopo do saldo. Filtros por produto e tipo.",
+                "summary": "Hist\u00f3rico de movimenta\u00e7\u00f5es",
+                "tags": [
+                    "Estoque"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 100
+                        }
+                    },
+                    {
+                        "name": "produtoId",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "tipo",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "ENTRADA",
+                                "SAIDA",
+                                "AJUSTE",
+                                "ESTORNO"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated set of `MovimentacaoEstoqueResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/MovimentacaoEstoqueResource"
+                                            }
+                                        },
+                                        "links": {
+                                            "type": "object",
+                                            "properties": {
+                                                "first": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "last": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "prev": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "next": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "first",
+                                                "last",
+                                                "prev",
+                                                "next"
+                                            ]
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer",
+                                                    "minimum": 1
+                                                },
+                                                "from": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "minimum": 1
+                                                },
+                                                "last_page": {
+                                                    "type": "integer",
+                                                    "minimum": 1
+                                                },
+                                                "links": {
+                                                    "type": "array",
+                                                    "description": "Generated paginator links.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "url": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            },
+                                                            "active": {
+                                                                "type": "boolean"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "url",
+                                                            "label",
+                                                            "active"
+                                                        ]
+                                                    }
+                                                },
+                                                "path": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "description": "Base path for paginator generated URLs."
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "description": "Number of items shown per page.",
+                                                    "minimum": 0
+                                                },
+                                                "to": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "description": "Number of the last item in the slice.",
+                                                    "minimum": 1
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "description": "Total number of items being paginated.",
+                                                    "minimum": 0
+                                                }
+                                            },
+                                            "required": [
+                                                "current_page",
+                                                "from",
+                                                "last_page",
+                                                "links",
+                                                "path",
+                                                "per_page",
+                                                "to",
+                                                "total"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "links",
+                                        "meta"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            },
+            "post": {
+                "operationId": "estoque.movimentar",
+                "description": "S\u00f3 o GERENTE da unidade. A quantidade \u00e9 positiva em `ENTRADA` e `SAIDA` e vem com sinal no `AJUSTE`. Saldo ficaria negativo: 409 `ESTOQUE_INSUFICIENTE`. Gera auditoria.",
+                "summary": "Registra entrada, sa\u00edda ou ajuste",
+                "tags": [
+                    "Estoque"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MovimentarEstoqueRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "`MovimentacaoEstoqueResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/MovimentacaoEstoqueResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/clientes/me/fidelidade/saldo": {
+            "get": {
+                "operationId": "fidelidade.saldo",
+                "description": "S\u00f3 CLIENTE. Soma dos lan\u00e7amentos de pontos.",
+                "summary": "Saldo de pontos",
+                "tags": [
+                    "Fidelidade"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "saldo": {
+                                                    "type": "integer"
+                                                }
+                                            },
+                                            "required": [
+                                                "saldo"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/clientes/me/fidelidade/extrato": {
+            "get": {
+                "operationId": "fidelidade.extrato",
+                "description": "S\u00f3 CLIENTE. Do mais novo para o mais antigo. Estornos aparecem com pontos negativos.",
+                "summary": "Extrato de pontos",
+                "tags": [
+                    "Fidelidade"
+                ],
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 100
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated set of `PontosResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/PontosResource"
+                                            }
+                                        },
+                                        "links": {
+                                            "type": "object",
+                                            "properties": {
+                                                "first": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "last": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "prev": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "next": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "first",
+                                                "last",
+                                                "prev",
+                                                "next"
+                                            ]
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer",
+                                                    "minimum": 1
+                                                },
+                                                "from": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "minimum": 1
+                                                },
+                                                "last_page": {
+                                                    "type": "integer",
+                                                    "minimum": 1
+                                                },
+                                                "links": {
+                                                    "type": "array",
+                                                    "description": "Generated paginator links.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "url": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            },
+                                                            "active": {
+                                                                "type": "boolean"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "url",
+                                                            "label",
+                                                            "active"
+                                                        ]
+                                                    }
+                                                },
+                                                "path": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "description": "Base path for paginator generated URLs."
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "description": "Number of items shown per page.",
+                                                    "minimum": 0
+                                                },
+                                                "to": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "description": "Number of the last item in the slice.",
+                                                    "minimum": 1
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "description": "Total number of items being paginated.",
+                                                    "minimum": 0
+                                                }
+                                            },
+                                            "required": [
+                                                "current_page",
+                                                "from",
+                                                "last_page",
+                                                "links",
+                                                "path",
+                                                "per_page",
+                                                "to",
+                                                "total"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "links",
+                                        "meta"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/pagamentos": {
+            "post": {
+                "operationId": "pagamento.store",
+                "description": "CLIENTE (dono do pedido) ou ATENDENTE da unidade. Aceita `Idempotency-Key`. `simularResultado` (`APROVADO`, `RECUSADO`, `ERRO`) controla o gateway mock e n\u00e3o \u00e9 aceito em produ\u00e7\u00e3o.\n\n- `APROVADO`: 200, pedido vai para `PAGO` e os pontos de fidelidade s\u00e3o creditados (se houver consentimento).\n- `RECUSADO`: 402 `PAGAMENTO_RECUSADO`, pedido cancelado e estoque devolvido.\n- `ERRO`: 503 `GATEWAY_INDISPONIVEL`, pedido continua aguardando e pode tentar de novo.\n- Pedido fora de `AGUARDANDO_PAGAMENTO` ou `valor` diferente do total: 409 `PEDIDO_NAO_PAGAVEL`.",
+                "summary": "Solicita o pagamento do pedido",
+                "tags": [
+                    "Pagamento"
+                ],
+                "parameters": [
+                    {
+                        "name": "Idempotency-Key",
+                        "in": "header",
+                        "description": "Opcional. 1 a 100 caracteres vis\u00edveis, sem espa\u00e7o. A mesma chave com o mesmo corpo em at\u00e9 24 h devolve a resposta original (header `Idempotent-Replayed: true`); corpo diferente d\u00e1 409 `CHAVE_IDEMPOTENCIA_CONFLITANTE`.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SolicitarPagamentoRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "`PagamentoResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/components/schemas/PagamentoResource"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "required": [
+                                                        "pedidoStatus"
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/pedidos": {
+            "post": {
+                "operationId": "pedido.store",
+                "description": "CLIENTE (qualquer canal menos `BALCAO`, e o pedido \u00e9 dele) ou ATENDENTE da unidade (`clienteId` obrigat\u00f3rio fora do `BALCAO`). Aceita `Idempotency-Key`. O pre\u00e7o e o total v\u00eam sempre do card\u00e1pio, o estoque \u00e9 baixado na mesma transa\u00e7\u00e3o e o pedido nasce em `AGUARDANDO_PAGAMENTO`.\n\nErros: 404 `UNIDADE_NAO_ENCONTRADA` ou `PRODUTO_NAO_ENCONTRADO`; 409 `UNIDADE_FECHADA`, `PRODUTO_INDISPONIVEL`, `ESTOQUE_INSUFICIENTE` (todos os itens sem saldo em `details`) e `CHAVE_IDEMPOTENCIA_CONFLITANTE`.",
+                "summary": "Cria pedido",
+                "tags": [
+                    "Pedido"
+                ],
+                "parameters": [
+                    {
+                        "name": "Idempotency-Key",
+                        "in": "header",
+                        "description": "Opcional. 1 a 100 caracteres vis\u00edveis, sem espa\u00e7o. A mesma chave com o mesmo corpo em at\u00e9 24 h devolve a resposta original (header `Idempotent-Replayed: true`); corpo diferente d\u00e1 409 `CHAVE_IDEMPOTENCIA_CONFLITANTE`.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CriarPedidoRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "`PedidoResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/PedidoResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            },
+            "get": {
+                "operationId": "pedido.index",
+                "description": "CLIENTE v\u00ea s\u00f3 os pr\u00f3prios; ATENDENTE, COZINHA e GERENTE s\u00f3 os da unidade (filtrar outra unidade: 403); ADMIN v\u00ea a rede toda. Do mais novo para o mais antigo.",
+                "summary": "Lista pedidos",
+                "tags": [
+                    "Pedido"
+                ],
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 100
+                        }
+                    },
+                    {
+                        "name": "canalPedido",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "APP",
+                                "TOTEM",
+                                "BALCAO",
+                                "PICKUP",
+                                "WEB"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "AGUARDANDO_PAGAMENTO",
+                                "PAGO",
+                                "EM_PREPARO",
+                                "PRONTO",
+                                "ENTREGUE",
+                                "CANCELADO"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "unidadeId",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated set of `PedidoResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/PedidoResource"
+                                            }
+                                        },
+                                        "links": {
+                                            "type": "object",
+                                            "properties": {
+                                                "first": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "last": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "prev": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "next": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "first",
+                                                "last",
+                                                "prev",
+                                                "next"
+                                            ]
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer",
+                                                    "minimum": 1
+                                                },
+                                                "from": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "minimum": 1
+                                                },
+                                                "last_page": {
+                                                    "type": "integer",
+                                                    "minimum": 1
+                                                },
+                                                "links": {
+                                                    "type": "array",
+                                                    "description": "Generated paginator links.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "url": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            },
+                                                            "active": {
+                                                                "type": "boolean"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "url",
+                                                            "label",
+                                                            "active"
+                                                        ]
+                                                    }
+                                                },
+                                                "path": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "description": "Base path for paginator generated URLs."
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "description": "Number of items shown per page.",
+                                                    "minimum": 0
+                                                },
+                                                "to": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "description": "Number of the last item in the slice.",
+                                                    "minimum": 1
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "description": "Total number of items being paginated.",
+                                                    "minimum": 0
+                                                }
+                                            },
+                                            "required": [
+                                                "current_page",
+                                                "from",
+                                                "last_page",
+                                                "links",
+                                                "path",
+                                                "per_page",
+                                                "to",
+                                                "total"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "links",
+                                        "meta"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/pedidos/{id}": {
+            "get": {
+                "operationId": "pedido.show",
+                "description": "Pedido de outro cliente ou inexistente: 404 `NAO_ENCONTRADO`. Equipe de outra unidade: 403.",
+                "summary": "Consulta pedido com hist\u00f3rico de status",
+                "tags": [
+                    "Pedido"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`PedidoResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/PedidoResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/pedidos/{id}/cancelamento": {
+            "post": {
+                "operationId": "pedido.cancelar",
+                "description": "CLIENTE (s\u00f3 o dele) cancela em `AGUARDANDO_PAGAMENTO`; ATENDENTE at\u00e9 `PAGO`; GERENTE at\u00e9 `EM_PREPARO`. Devolve o estoque, estorna o pagamento e os pontos e grava auditoria. Fora do limite do perfil: 403. Pedido `PRONTO`, `ENTREGUE` ou j\u00e1 cancelado: 409 `TRANSICAO_INVALIDA`. Falha no estorno do gateway: 503 `GATEWAY_INDISPONIVEL` (nada \u00e9 cancelado).",
+                "summary": "Cancela o pedido",
+                "tags": [
+                    "Pedido"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CancelarPedidoRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "`PedidoResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/components/schemas/PedidoResource"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "required": [
+                                                        "historico"
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/pedidos/{id}/status": {
+            "patch": {
+                "operationId": "pedido.atualizarStatus",
+                "description": "COZINHA move `PAGO` \u2192 `EM_PREPARO` \u2192 `PRONTO`; ATENDENTE move `PRONTO` \u2192 `ENTREGUE`, sempre na pr\u00f3pria unidade (sen\u00e3o 403). Transi\u00e7\u00e3o fora da m\u00e1quina de status: 409 `TRANSICAO_INVALIDA`. `PAGO` e `CANCELADO` n\u00e3o passam por aqui.",
+                "summary": "Avan\u00e7a o status do pedido",
+                "tags": [
+                    "Pedido"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AtualizarStatusRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "`PedidoResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/components/schemas/PedidoResource"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "required": [
+                                                        "historico"
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/produtos": {
+            "get": {
+                "operationId": "produto.index",
+                "description": "ADMIN e GERENTE. Paginado.",
+                "summary": "Lista o cat\u00e1logo",
+                "tags": [
+                    "Produto"
+                ],
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 100
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated set of `ProdutoResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/ProdutoResource"
+                                            }
+                                        },
+                                        "links": {
+                                            "type": "object",
+                                            "properties": {
+                                                "first": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "last": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "prev": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "next": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "first",
+                                                "last",
+                                                "prev",
+                                                "next"
+                                            ]
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer",
+                                                    "minimum": 1
+                                                },
+                                                "from": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "minimum": 1
+                                                },
+                                                "last_page": {
+                                                    "type": "integer",
+                                                    "minimum": 1
+                                                },
+                                                "links": {
+                                                    "type": "array",
+                                                    "description": "Generated paginator links.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "url": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            },
+                                                            "active": {
+                                                                "type": "boolean"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "url",
+                                                            "label",
+                                                            "active"
+                                                        ]
+                                                    }
+                                                },
+                                                "path": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "description": "Base path for paginator generated URLs."
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "description": "Number of items shown per page.",
+                                                    "minimum": 0
+                                                },
+                                                "to": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "description": "Number of the last item in the slice.",
+                                                    "minimum": 1
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "description": "Total number of items being paginated.",
+                                                    "minimum": 0
+                                                }
+                                            },
+                                            "required": [
+                                                "current_page",
+                                                "from",
+                                                "last_page",
+                                                "links",
+                                                "path",
+                                                "per_page",
+                                                "to",
+                                                "total"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "links",
+                                        "meta"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            },
+            "post": {
+                "operationId": "produto.store",
+                "description": "S\u00f3 ADMIN.",
+                "summary": "Cria produto",
+                "tags": [
+                    "Produto"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ProdutoRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "`ProdutoResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/ProdutoResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/produtos/{id}": {
+            "get": {
+                "operationId": "produto.show",
+                "description": "ADMIN e GERENTE. 404 `PRODUTO_NAO_ENCONTRADO`.",
+                "summary": "Detalha um produto",
+                "tags": [
+                    "Produto"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`ProdutoResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/ProdutoResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            },
+            "put": {
+                "operationId": "produto.update",
+                "description": "S\u00f3 ADMIN. 404 `PRODUTO_NAO_ENCONTRADO`.",
+                "summary": "Atualiza produto",
+                "tags": [
+                    "Produto"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ProdutoRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "`ProdutoResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/ProdutoResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/relatorios/vendas": {
+            "get": {
+                "operationId": "relatorio.vendas",
+                "description": "ADMIN e GERENTE (s\u00f3 a sua unidade; outra unidade: 403). `de` e `ate` s\u00e3o obrigat\u00f3rios (at\u00e9 366 dias). Conta pedidos `PAGO`, `EM_PREPARO`, `PRONTO` e `ENTREGUE`. Agrupa por `unidade` (padr\u00e3o), `regiao` ou `canal`; `totais` cobre todos os grupos.",
+                "summary": "Vendas no per\u00edodo",
+                "tags": [
+                    "Relatorio"
+                ],
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 100
+                        }
+                    },
+                    {
+                        "name": "de",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "ate",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "unidadeId",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "regiao",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "NE",
+                                "SE",
+                                "S",
+                                "CO",
+                                "N"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "canalPedido",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "APP",
+                                "TOTEM",
+                                "BALCAO",
+                                "PICKUP",
+                                "WEB"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "agruparPor",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "unidade",
+                                "regiao",
+                                "canal"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "agruparPor": {
+                                            "anyOf": [
+                                                {
+                                                    "type": "string"
+                                                },
+                                                {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "unidade"
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        "periodo": {
+                                            "type": "object",
+                                            "properties": {
+                                                "de": {
+                                                    "type": "string"
+                                                },
+                                                "ate": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "de",
+                                                "ate"
+                                            ]
+                                        },
+                                        "totais": {
+                                            "type": "object",
+                                            "properties": {
+                                                "pedidos": {
+                                                    "type": "integer"
+                                                },
+                                                "faturamento": {
+                                                    "type": "number"
+                                                },
+                                                "ticketMedio": {
+                                                    "type": "number"
+                                                }
+                                            },
+                                            "required": [
+                                                "pedidos",
+                                                "faturamento",
+                                                "ticketMedio"
+                                            ]
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "array",
+                                                "items": {}
+                                            }
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "string"
+                                                },
+                                                "per_page": {
+                                                    "type": "string"
+                                                },
+                                                "total": {
+                                                    "type": "string"
+                                                },
+                                                "last_page": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "current_page",
+                                                "per_page",
+                                                "total",
+                                                "last_page"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "agruparPor",
+                                        "periodo",
+                                        "totais",
+                                        "data",
+                                        "meta"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/relatorios/produtos-mais-vendidos": {
+            "get": {
+                "operationId": "relatorio.produtosMaisVendidos",
+                "description": "ADMIN e GERENTE (s\u00f3 a sua unidade). Ordenado por quantidade, no per\u00edodo informado.",
+                "summary": "Ranking de produtos mais vendidos",
+                "tags": [
+                    "Relatorio"
+                ],
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 100
+                        }
+                    },
+                    {
+                        "name": "de",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "ate",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "unidadeId",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "regiao",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "NE",
+                                "SE",
+                                "S",
+                                "CO",
+                                "N"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "periodo": {
+                                            "type": "object",
+                                            "properties": {
+                                                "de": {},
+                                                "ate": {}
+                                            },
+                                            "required": [
+                                                "de",
+                                                "ate"
+                                            ]
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "posicao": {
+                                                        "type": "integer"
+                                                    },
+                                                    "produtoId": {
+                                                        "type": "integer"
+                                                    },
+                                                    "nome": {
+                                                        "type": "string"
+                                                    },
+                                                    "quantidade": {
+                                                        "type": "integer"
+                                                    },
+                                                    "faturamento": {
+                                                        "type": "number"
+                                                    },
+                                                    "pedidos": {
+                                                        "type": "integer"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "posicao",
+                                                    "produtoId",
+                                                    "nome",
+                                                    "quantidade",
+                                                    "faturamento",
+                                                    "pedidos"
+                                                ]
+                                            }
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "string"
+                                                },
+                                                "per_page": {
+                                                    "type": "string"
+                                                },
+                                                "total": {
+                                                    "type": "string"
+                                                },
+                                                "last_page": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "current_page",
+                                                "per_page",
+                                                "total",
+                                                "last_page"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "periodo",
+                                        "data",
+                                        "meta"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/unidades": {
+            "get": {
+                "operationId": "unidade.index",
+                "description": "P\u00fablico, paginado.",
+                "summary": "Lista as unidades ativas",
+                "tags": [
+                    "Unidade"
+                ],
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 100
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated set of `UnidadeResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/UnidadeResource"
+                                            }
+                                        },
+                                        "links": {
+                                            "type": "object",
+                                            "properties": {
+                                                "first": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "last": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "prev": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "next": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "first",
+                                                "last",
+                                                "prev",
+                                                "next"
+                                            ]
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer",
+                                                    "minimum": 1
+                                                },
+                                                "from": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "minimum": 1
+                                                },
+                                                "last_page": {
+                                                    "type": "integer",
+                                                    "minimum": 1
+                                                },
+                                                "links": {
+                                                    "type": "array",
+                                                    "description": "Generated paginator links.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "url": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            },
+                                                            "active": {
+                                                                "type": "boolean"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "url",
+                                                            "label",
+                                                            "active"
+                                                        ]
+                                                    }
+                                                },
+                                                "path": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "description": "Base path for paginator generated URLs."
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "description": "Number of items shown per page.",
+                                                    "minimum": 0
+                                                },
+                                                "to": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "description": "Number of the last item in the slice.",
+                                                    "minimum": 1
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "description": "Total number of items being paginated.",
+                                                    "minimum": 0
+                                                }
+                                            },
+                                            "required": [
+                                                "current_page",
+                                                "from",
+                                                "last_page",
+                                                "links",
+                                                "path",
+                                                "per_page",
+                                                "to",
+                                                "total"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "links",
+                                        "meta"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                },
+                "security": []
+            }
+        },
+        "/unidades/{id}": {
+            "get": {
+                "operationId": "unidade.show",
+                "description": "P\u00fablico. Traz formato e hor\u00e1rios de funcionamento. Unidade inexistente ou inativa: 404 `UNIDADE_NAO_ENCONTRADA`.",
+                "summary": "Detalha uma unidade",
+                "tags": [
+                    "Unidade"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`UnidadeResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/UnidadeResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": []
+            },
+            "put": {
+                "operationId": "unidade.update",
+                "description": "ADMIN em qualquer unidade, GERENTE s\u00f3 na sua (403). Trocar para formato `REDUZIDO` com produto que exige cozinha completa no card\u00e1pio: 422 `PRODUTO_INCOMPATIVEL_COM_UNIDADE`.",
+                "summary": "Atualiza formato e hor\u00e1rios",
+                "tags": [
+                    "Unidade"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AtualizarUnidadeRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "`UnidadeResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/UnidadeResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "http": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
+        },
+        "schemas": {
+            "AtualizarStatusRequest": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "EM_PREPARO",
+                            "PRONTO",
+                            "ENTREGUE"
+                        ]
+                    }
+                },
+                "required": [
+                    "status"
+                ],
+                "title": "AtualizarStatusRequest"
+            },
+            "AtualizarUnidadeRequest": {
+                "type": "object",
+                "properties": {
+                    "formato": {
+                        "$ref": "#/components/schemas/FormatoUnidade"
+                    },
+                    "horarios": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "diaSemana": {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 6
+                                },
+                                "abre": {
+                                    "type": "string"
+                                },
+                                "fecha": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "diaSemana",
+                                "abre",
+                                "fecha"
+                            ]
+                        },
+                        "minItems": 1,
+                        "uniqueItems": true
+                    }
+                },
+                "title": "AtualizarUnidadeRequest"
+            },
+            "AuditoriaResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "usuarioId": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "acao": {
+                        "type": "string",
+                        "enum": [
+                            "CADASTRO_CLIENTE",
+                            "REVOGACAO_CONSENTIMENTO",
+                            "AJUSTE_ESTOQUE",
+                            "CRIACAO_PEDIDO",
+                            "ATUALIZACAO_STATUS_PEDIDO",
+                            "PAGAMENTO_PEDIDO",
+                            "CANCELAMENTO_PEDIDO",
+                            "ACESSO_DADOS_PESSOAIS"
+                        ]
+                    },
+                    "entidade": {
+                        "type": "string"
+                    },
+                    "entidadeId": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "dadosAntes": {
+                        "type": [
+                            "array",
+                            "null"
+                        ],
+                        "items": {}
+                    },
+                    "dadosDepois": {
+                        "type": [
+                            "array",
+                            "null"
+                        ],
+                        "items": {}
+                    },
+                    "ip": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "em": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "usuarioId",
+                    "acao",
+                    "entidade",
+                    "entidadeId",
+                    "dadosAntes",
+                    "dadosDepois",
+                    "ip",
+                    "em"
+                ],
+                "title": "AuditoriaResource"
+            },
+            "CadastroClienteRequest": {
+                "type": "object",
+                "properties": {
+                    "nome": {
+                        "type": "string",
+                        "maxLength": 255
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "maxLength": 255
+                    },
+                    "senha": {
+                        "type": "string",
+                        "minLength": 8,
+                        "maxLength": 72
+                    },
+                    "telefone": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "maxLength": 20
+                    },
+                    "dataNascimento": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date"
+                    },
+                    "aceiteTermos": {
+                        "enum": [
+                            "yes",
+                            "on",
+                            "1",
+                            1,
+                            "true",
+                            true
+                        ]
+                    },
+                    "consentimentoFidelidade": {
+                        "type": "boolean"
+                    },
+                    "consentimentoMarketing": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "nome",
+                    "email",
+                    "senha",
+                    "aceiteTermos"
+                ],
+                "title": "CadastroClienteRequest"
+            },
+            "CancelarPedidoRequest": {
+                "type": "object",
+                "properties": {
+                    "motivo": {
+                        "type": "string",
+                        "minLength": 3,
+                        "maxLength": 255
+                    }
+                },
+                "required": [
+                    "motivo"
+                ],
+                "title": "CancelarPedidoRequest"
+            },
+            "ClienteResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "nome": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "telefone": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "faixaEtaria": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "criadoEm": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "nome",
+                    "email",
+                    "telefone",
+                    "faixaEtaria",
+                    "criadoEm"
+                ],
+                "title": "ClienteResource"
+            },
+            "ConsentimentoResource": {
+                "type": "object",
+                "properties": {
+                    "finalidade": {
+                        "type": "string",
+                        "enum": [
+                            "TERMOS",
+                            "FIDELIDADE",
+                            "MARKETING"
+                        ]
+                    },
+                    "aceito": {
+                        "type": "boolean"
+                    },
+                    "versaoTermo": {
+                        "type": "string"
+                    },
+                    "concedidoEm": {
+                        "type": "string"
+                    },
+                    "revogadoEm": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    }
+                },
+                "required": [
+                    "finalidade",
+                    "aceito",
+                    "versaoTermo",
+                    "concedidoEm",
+                    "revogadoEm"
+                ],
+                "title": "ConsentimentoResource"
+            },
+            "CriarPedidoRequest": {
+                "type": "object",
+                "properties": {
+                    "canalPedido": {
+                        "type": "string",
+                        "enum": [
+                            "APP",
+                            "TOTEM",
+                            "BALCAO",
+                            "PICKUP",
+                            "WEB"
+                        ]
+                    },
+                    "unidadeId": {
+                        "type": "integer",
+                        "minimum": 1
+                    },
+                    "clienteId": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "itens": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "produtoId": {
+                                    "type": "integer",
+                                    "minimum": 1
+                                },
+                                "quantidade": {
+                                    "type": "integer",
+                                    "minimum": 1,
+                                    "maximum": 99
+                                }
+                            },
+                            "required": [
+                                "produtoId",
+                                "quantidade"
+                            ]
+                        },
+                        "minItems": 1,
+                        "maxItems": 50,
+                        "uniqueItems": true
+                    }
+                },
+                "required": [
+                    "canalPedido",
+                    "unidadeId",
+                    "itens"
+                ],
+                "title": "CriarPedidoRequest"
+            },
+            "Erro": {
+                "type": "object",
+                "properties": {
+                    "error": {
+                        "type": "string",
+                        "description": "C\u00f3digo fixo do erro, por exemplo `ESTOQUE_INSUFICIENTE`"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "details": {
+                        "type": "array",
+                        "description": "Detalhes por item; na valida\u00e7\u00e3o, `campo` e `mensagem`",
+                        "items": {
+                            "type": "object"
+                        }
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "path": {
+                        "type": "string"
+                    },
+                    "requestId": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "error",
+                    "message",
+                    "details",
+                    "timestamp",
+                    "path",
+                    "requestId"
+                ],
+                "title": "Erro"
+            },
+            "EstoqueResource": {
+                "type": "object",
+                "properties": {
+                    "produtoId": {
+                        "type": "integer"
+                    },
+                    "nome": {
+                        "type": "string"
+                    },
+                    "quantidade": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "produtoId",
+                    "nome",
+                    "quantidade"
+                ],
+                "title": "EstoqueResource"
+            },
+            "FormatoUnidade": {
+                "type": "string",
+                "enum": [
+                    "COMPLETA",
+                    "REDUZIDA"
+                ],
+                "title": "FormatoUnidade"
+            },
+            "ItemCardapioRequest": {
+                "type": "object",
+                "properties": {
+                    "preco": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 99999999.99
+                    },
+                    "disponivel": {
+                        "type": "boolean"
+                    },
+                    "inicioSazonal": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "pattern": "^(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$"
+                    },
+                    "fimSazonal": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "pattern": "^(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$"
+                    },
+                    "descricaoRegional": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "maxLength": 255
+                    }
+                },
+                "required": [
+                    "preco"
+                ],
+                "title": "ItemCardapioRequest"
+            },
+            "ItemCardapioResource": {
+                "type": "object",
+                "properties": {
+                    "produtoId": {
+                        "type": "integer"
+                    },
+                    "nome": {
+                        "type": "string"
+                    },
+                    "descricao": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "a descricao regional da unidade vale mais que a do catalogo"
+                    },
+                    "categoria": {
+                        "type": "string"
+                    },
+                    "preco": {
+                        "type": "number"
+                    },
+                    "disponivel": {
+                        "type": "boolean"
+                    },
+                    "inicioSazonal": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "fimSazonal": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    }
+                },
+                "required": [
+                    "produtoId",
+                    "nome",
+                    "descricao",
+                    "categoria",
+                    "preco",
+                    "disponivel",
+                    "inicioSazonal",
+                    "fimSazonal"
+                ],
+                "title": "ItemCardapioResource"
+            },
+            "LoginRequest": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "senha": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "email",
+                    "senha"
+                ],
+                "title": "LoginRequest"
+            },
+            "MovimentacaoEstoqueResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "produtoId": {
+                        "type": "integer"
+                    },
+                    "tipo": {
+                        "type": "string",
+                        "enum": [
+                            "ENTRADA",
+                            "SAIDA",
+                            "AJUSTE",
+                            "ESTORNO"
+                        ]
+                    },
+                    "quantidade": {
+                        "type": "integer"
+                    },
+                    "saldoApos": {
+                        "type": "integer"
+                    },
+                    "motivo": {
+                        "type": "string"
+                    },
+                    "pedidoId": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "usuarioId": {
+                        "type": "integer"
+                    },
+                    "criadoEm": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "produtoId",
+                    "tipo",
+                    "quantidade",
+                    "saldoApos",
+                    "motivo",
+                    "pedidoId",
+                    "usuarioId",
+                    "criadoEm"
+                ],
+                "title": "MovimentacaoEstoqueResource"
+            },
+            "MovimentarEstoqueRequest": {
+                "type": "object",
+                "properties": {
+                    "produtoId": {
+                        "type": "integer",
+                        "minimum": 1
+                    },
+                    "tipo": {
+                        "type": "string",
+                        "enum": [
+                            "ENTRADA",
+                            "SAIDA",
+                            "AJUSTE"
+                        ]
+                    },
+                    "quantidade": {
+                        "type": "integer",
+                        "minimum": -1000000,
+                        "maximum": 1000000
+                    },
+                    "motivo": {
+                        "type": "string",
+                        "minLength": 3,
+                        "maxLength": 255
+                    }
+                },
+                "required": [
+                    "produtoId",
+                    "tipo",
+                    "quantidade",
+                    "motivo"
+                ],
+                "title": "MovimentarEstoqueRequest"
+            },
+            "PagamentoResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "pedidoId": {
+                        "type": "integer"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "PENDENTE",
+                            "APROVADO",
+                            "RECUSADO",
+                            "ERRO",
+                            "ESTORNADO"
+                        ]
+                    },
+                    "valor": {
+                        "type": "number"
+                    },
+                    "metodo": {
+                        "type": "string"
+                    },
+                    "transacaoExternaId": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "processadoEm": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "pedidoStatus": {
+                        "type": "string",
+                        "enum": [
+                            "AGUARDANDO_PAGAMENTO",
+                            "PAGO",
+                            "EM_PREPARO",
+                            "PRONTO",
+                            "ENTREGUE",
+                            "CANCELADO"
+                        ]
+                    }
+                },
+                "required": [
+                    "id",
+                    "pedidoId",
+                    "status",
+                    "valor",
+                    "metodo",
+                    "transacaoExternaId",
+                    "processadoEm"
+                ],
+                "title": "PagamentoResource"
+            },
+            "PedidoResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "unidadeId": {
+                        "type": "integer"
+                    },
+                    "clienteId": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "criadoPor": {
+                        "type": "integer"
+                    },
+                    "canalPedido": {
+                        "type": "string",
+                        "enum": [
+                            "APP",
+                            "TOTEM",
+                            "BALCAO",
+                            "PICKUP",
+                            "WEB"
+                        ]
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "AGUARDANDO_PAGAMENTO",
+                            "PAGO",
+                            "EM_PREPARO",
+                            "PRONTO",
+                            "ENTREGUE",
+                            "CANCELADO"
+                        ]
+                    },
+                    "subtotal": {
+                        "type": "number"
+                    },
+                    "desconto": {
+                        "type": "number"
+                    },
+                    "total": {
+                        "type": "number"
+                    },
+                    "motivoCancelamento": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "itens": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "produtoId": {
+                                    "type": "integer"
+                                },
+                                "nome": {
+                                    "type": "string"
+                                },
+                                "quantidade": {
+                                    "type": "integer"
+                                },
+                                "precoUnitario": {
+                                    "type": "number"
+                                },
+                                "subtotal": {
+                                    "type": "number"
+                                }
+                            },
+                            "required": [
+                                "produtoId",
+                                "nome",
+                                "quantidade",
+                                "precoUnitario",
+                                "subtotal"
+                            ]
+                        }
+                    },
+                    "historico": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "statusAnterior": {
+                                    "type": [
+                                        "string",
+                                        "null"
+                                    ],
+                                    "enum": [
+                                        "AGUARDANDO_PAGAMENTO",
+                                        "PAGO",
+                                        "EM_PREPARO",
+                                        "PRONTO",
+                                        "ENTREGUE",
+                                        "CANCELADO",
+                                        null
+                                    ]
+                                },
+                                "statusNovo": {
+                                    "type": "string",
+                                    "enum": [
+                                        "AGUARDANDO_PAGAMENTO",
+                                        "PAGO",
+                                        "EM_PREPARO",
+                                        "PRONTO",
+                                        "ENTREGUE",
+                                        "CANCELADO"
+                                    ]
+                                },
+                                "usuarioId": {
+                                    "type": "integer"
+                                },
+                                "em": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "statusAnterior",
+                                "statusNovo",
+                                "usuarioId",
+                                "em"
+                            ]
+                        }
+                    },
+                    "criadoEm": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "unidadeId",
+                    "clienteId",
+                    "criadoPor",
+                    "canalPedido",
+                    "status",
+                    "subtotal",
+                    "desconto",
+                    "total",
+                    "motivoCancelamento",
+                    "itens",
+                    "criadoEm"
+                ],
+                "title": "PedidoResource"
+            },
+            "PontosResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "tipo": {
+                        "type": "string",
+                        "enum": [
+                            "CREDITO",
+                            "DEBITO",
+                            "ESTORNO"
+                        ]
+                    },
+                    "pontos": {
+                        "type": "integer"
+                    },
+                    "pedidoId": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "em": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "tipo",
+                    "pontos",
+                    "pedidoId",
+                    "em"
+                ],
+                "title": "PontosResource"
+            },
+            "ProdutoRequest": {
+                "type": "object",
+                "properties": {
+                    "nome": {
+                        "type": "string",
+                        "maxLength": 255
+                    },
+                    "descricao": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "maxLength": 2000
+                    },
+                    "categoria": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "exigeCozinhaCompleta": {
+                        "type": "boolean"
+                    },
+                    "ativo": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "nome",
+                    "categoria"
+                ],
+                "title": "ProdutoRequest"
+            },
+            "ProdutoResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "nome": {
+                        "type": "string"
+                    },
+                    "descricao": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "categoria": {
+                        "type": "string"
+                    },
+                    "exigeCozinhaCompleta": {
+                        "type": "boolean"
+                    },
+                    "ativo": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "id",
+                    "nome",
+                    "descricao",
+                    "categoria",
+                    "exigeCozinhaCompleta",
+                    "ativo"
+                ],
+                "title": "ProdutoResource"
+            },
+            "SolicitarPagamentoRequest": {
+                "type": "object",
+                "properties": {
+                    "pedidoId": {
+                        "type": "integer",
+                        "minimum": 1
+                    },
+                    "valor": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "pattern": "^\\d{1,8}(\\.\\d{1,2})?$"
+                    },
+                    "simularResultado": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "enum": [
+                            "APROVADO",
+                            "RECUSADO",
+                            "ERRO",
+                            null
+                        ]
+                    }
+                },
+                "required": [
+                    "pedidoId"
+                ],
+                "title": "SolicitarPagamentoRequest"
+            },
+            "UnidadeResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "nome": {
+                        "type": "string"
+                    },
+                    "cidade": {
+                        "type": "string"
+                    },
+                    "uf": {
+                        "type": "string"
+                    },
+                    "regiao": {
+                        "type": "string"
+                    },
+                    "formato": {
+                        "type": "string",
+                        "enum": [
+                            "COMPLETA",
+                            "REDUZIDA"
+                        ]
+                    },
+                    "horarios": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "diaSemana": {
+                                    "type": "integer"
+                                },
+                                "abre": {
+                                    "type": "string"
+                                },
+                                "fecha": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "diaSemana",
+                                "abre",
+                                "fecha"
+                            ]
+                        }
+                    }
+                },
+                "required": [
+                    "id",
+                    "nome",
+                    "cidade",
+                    "uf",
+                    "regiao",
+                    "formato",
+                    "horarios"
+                ],
+                "title": "UnidadeResource"
+            },
+            "UsuarioResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "nome": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "perfil": {
+                        "type": "string",
+                        "enum": [
+                            "ADMIN",
+                            "GERENTE",
+                            "ATENDENTE",
+                            "COZINHA",
+                            "CLIENTE"
+                        ]
+                    },
+                    "unidadeId": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "telefone": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "consentimentos": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ConsentimentoResource"
+                        }
+                    }
+                },
+                "required": [
+                    "id",
+                    "nome",
+                    "email",
+                    "perfil",
+                    "unidadeId",
+                    "telefone"
+                ],
+                "title": "UsuarioResource"
+            }
+        },
+        "responses": {
+            "ValidationException": {
+                "description": "Dados inv\u00e1lidos (`VALIDACAO`)",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Erro"
+                        }
+                    }
+                }
+            },
+            "AuthenticationException": {
+                "description": "Token ausente, inv\u00e1lido ou expirado (`NAO_AUTENTICADO`)",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Erro"
+                        }
+                    }
+                }
+            },
+            "AuthorizationException": {
+                "description": "Sem permiss\u00e3o para a opera\u00e7\u00e3o ou para a unidade (`ACESSO_NEGADO`)",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Erro"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

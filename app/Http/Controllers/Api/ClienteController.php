@@ -19,6 +19,11 @@ use Illuminate\Support\Facades\Gate;
 
 class ClienteController extends Controller
 {
+    /**
+     * Cadastra cliente
+     *
+     * Público. `aceiteTermos` é obrigatório; fidelidade e marketing são consentimentos separados. A data de nascimento só vale com consentimento de fidelidade.
+     */
     public function store(CadastroClienteRequest $request, CadastrarCliente $cadastrar)
     {
         $cliente = $cadastrar->executar($request->validated(), $request->ip());
@@ -26,6 +31,11 @@ class ClienteController extends Controller
         return (new UsuarioResource($cliente))->response()->setStatusCode(201);
     }
 
+    /**
+     * Meus consentimentos
+     *
+     * Só CLIENTE.
+     */
     public function consentimentos()
     {
         $lista = auth('api')->user()->consentimentos()->orderBy('id')->get();
@@ -33,6 +43,11 @@ class ClienteController extends Controller
         return ConsentimentoResource::collection($lista);
     }
 
+    /**
+     * Revoga consentimento
+     *
+     * Só CLIENTE. `FIDELIDADE` ou `MARKETING` (os termos não se revogam: 422). Revogar fidelidade apaga a data de nascimento. 404 se não há consentimento ativo.
+     */
     public function revogar(string $finalidade, RevogarConsentimento $revogar)
     {
         $consentimento = $revogar->executar(auth('api')->user(), Finalidade::from($finalidade));
@@ -40,6 +55,11 @@ class ClienteController extends Controller
         return new ConsentimentoResource($consentimento);
     }
 
+    /**
+     * Dados do cliente para a equipe
+     *
+     * ADMIN (qualquer cliente), GERENTE e ATENDENTE (só quem já pediu na unidade, senão 403). E-mail e telefone saem mascarados e no lugar da data de nascimento vai a faixa etária. Cada leitura grava `ACESSO_DADOS_PESSOAIS` na auditoria.
+     */
     public function show(int $id, ConsultarCliente $consultar)
     {
         $cliente = Usuario::where('perfil', Perfil::CLIENTE)->find($id);

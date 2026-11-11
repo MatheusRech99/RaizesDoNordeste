@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Domain\Pagamentos\PaymentGateway;
 use App\Domain\Pedidos\Pedido;
+use App\Infrastructure\Docs\ConfiguracaoOpenApi;
 use App\Infrastructure\Pagamentos\MockPaymentGateway;
 use App\Domain\Unidades\Unidade;
 use App\Domain\Usuarios\Usuario;
@@ -25,5 +26,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Unidade::class, UnidadePolicy::class);
         Gate::policy(Pedido::class, PedidoPolicy::class);
         Gate::policy(Usuario::class, UsuarioPolicy::class);
+
+        ConfiguracaoOpenApi::aplicar();
     }
 }

@@ -13,6 +13,16 @@ use Illuminate\Support\Facades\Gate;
 
 class PagamentoController extends Controller
 {
+    /**
+     * Solicita o pagamento do pedido
+     *
+     * CLIENTE (dono do pedido) ou ATENDENTE da unidade. Aceita `Idempotency-Key`. `simularResultado` (`APROVADO`, `RECUSADO`, `ERRO`) controla o gateway mock e não é aceito em produção.
+     *
+     * - `APROVADO`: 200, pedido vai para `PAGO` e os pontos de fidelidade são creditados (se houver consentimento).
+     * - `RECUSADO`: 402 `PAGAMENTO_RECUSADO`, pedido cancelado e estoque devolvido.
+     * - `ERRO`: 503 `GATEWAY_INDISPONIVEL`, pedido continua aguardando e pode tentar de novo.
+     * - Pedido fora de `AGUARDANDO_PAGAMENTO` ou `valor` diferente do total: 409 `PEDIDO_NAO_PAGAVEL`.
+     */
     public function store(SolicitarPagamentoRequest $request, SolicitarPagamento $solicitar)
     {
         $pedido = Pedido::find($request->integer('pedidoId'));

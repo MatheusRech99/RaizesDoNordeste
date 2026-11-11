@@ -14,6 +14,11 @@ use Illuminate\Support\Facades\Gate;
 
 class CardapioController extends Controller
 {
+    /**
+     * Cardápio da unidade
+     *
+     * Público. Só aparecem itens disponíveis e dentro do período sazonal na data (`data`, padrão hoje).
+     */
     public function index(int $id, CardapioRequest $request)
     {
         $unidade = Unidade::ativaOuFalha($id);
@@ -24,6 +29,11 @@ class CardapioController extends Controller
         return ItemCardapioResource::collection($itens);
     }
 
+    /**
+     * Inclui ou atualiza item do cardápio
+     *
+     * Só o GERENTE da unidade. Produto que exige cozinha completa em unidade `REDUZIDA`: 422 `PRODUTO_INCOMPATIVEL_COM_UNIDADE`. Produto inexistente: 404 `PRODUTO_NAO_ENCONTRADO`.
+     */
     public function salvar(int $id, int $produtoId, ItemCardapioRequest $request, MontarCardapio $montar)
     {
         $unidade = Unidade::ativaOuFalha($id);

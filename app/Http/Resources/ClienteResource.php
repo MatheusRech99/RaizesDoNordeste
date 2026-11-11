@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 // visao do cliente para perfil interno: e-mail e telefone mascarados, so a faixa etaria (RNF04)
+/** @mixin \App\Domain\Usuarios\Usuario */
 class ClienteResource extends JsonResource
 {
     public function toArray(Request $request): array
