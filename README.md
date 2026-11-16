@@ -30,7 +30,10 @@ Os valores de `DB_*` do `.env.example` já batem com isso. Depois:
 ```bash
 php artisan migrate --seed
 php artisan serve
+php artisan test
 ```
+
+A API sobe em `http://localhost:8000` (sem prefixo `/api`). Para um primeiro teste, faça login com `cliente@raizes.com` / `senha123` em `POST /auth/login`.
 
 ## Documentação da API (OpenAPI)
 
@@ -38,6 +41,12 @@ A spec é gerada a partir do código (rotas, Form Requests e Resources) com o [S
 
 - Swagger/Elements interativo: suba a API (`php artisan serve`) e abra `http://localhost:8000/docs/api`. Para testar rotas protegidas, faça login em `POST /auth/login` e cole o `accessToken` em Authorization (Bearer). O JSON também sai em `/docs/api.json`. As duas rotas só respondem com `APP_ENV=local`. O "Try It" chama o mesmo host e porta de onde a página foi aberta; se aparecer "Network Error", confira se a API está no ar nesse endereço (`php artisan serve --port=8001` muda a porta e a página acompanha).
 - Cada operação traz resumo, quem acessa e os códigos de erro de negócio na descrição. As falhas seguem o schema `Erro` (`error`, `message`, `details`, `timestamp`, `path`, `requestId`) e `POST /pedidos` e `POST /pagamentos` listam o header `Idempotency-Key`.
+
+## Erros
+
+Toda falha, de validação ou de regra de negócio, volta no mesmo JSON: `error` (código fixo, como `ESTOQUE_INSUFICIENTE`), `message`, `details[]`, `timestamp`, `path` e `requestId` (o mesmo valor do header `X-Request-Id`). O 422 do Laravel vira `VALIDACAO`, com um item `{ campo, mensagem }` em `details` para cada problema.
+
+As mensagens de validação saem em português (`APP_LOCALE=pt_BR`, traduções em `lang/pt_BR/validation.php`, com o nome dos campos como o cliente da API os envia).
 
 ## Autenticação
 
@@ -275,4 +284,4 @@ A pasta `00 Preparação` faz o login dos perfis do seed, abre a unidade 1 o dia
 
 ## Estado
 
-Em desenvolvimento por etapas; o histórico de commits acompanha a evolução do MVP.
+MVP completo: autenticação, unidades, cardápio, estoque, pedidos, pagamento mock, cancelamento, fidelidade, auditoria, relatórios, OpenAPI e coleção Postman. O histórico de commits acompanha a evolução por etapas.
