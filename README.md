@@ -228,7 +228,7 @@ A tabela só aceita INSERT: o model lança exceção em `update`/`delete` e o ba
 php artisan test
 ```
 
-Os testes usam SQLite em memória por padrão (`phpunit.xml`), então não precisam do MariaDB.
+Os testes usam SQLite em memória por padrão (`phpunit.xml`), então não precisam do MariaDB. Cobrem cada regra de negócio, o escopo por perfil, a idempotência, o contrato de erro e a spec OpenAPI, e `FluxoCompletoTest` percorre a jornada inteira só por HTTP com os dados do seed (cadastro → pedido → pagamento → preparo → entrega → pontos → relatório → auditoria).
 
 Para rodar no MariaDB (cobre o `CHECK` e as chaves estrangeiras, que o SQLite não valida), crie um banco de teste e passe as variáveis:
 
@@ -238,6 +238,40 @@ GRANT ALL ON raizes_nordeste_teste.* TO 'raizes'@'localhost';"
 
 DB_CONNECTION=mysql DB_DATABASE=raizes_nordeste_teste php artisan test
 ```
+
+### Concorrência (RNF09)
+
+`ConcorrenciaTest` sobe o servidor embutido do PHP com 12 workers e dispara requisições de verdade ao mesmo tempo. Só roda no MariaDB (no SQLite aparece como pulado), porque depende de lock de linha e de dados commitados. Cenários: 10 pedidos para saldo 5 (5 criados, 5 com 409 e saldo 0), pedidos de 2 unidades que nunca passam do saldo, pedido recusado sem rastro parcial, mesma `Idempotency-Key` simultânea (um só pedido), pagamentos simultâneos do mesmo pedido (cobra uma vez), pagar e cancelar ao mesmo tempo (estado final consistente) e mudança de status simultânea (passa uma vez).
+
+```bash
+DB_CONNECTION=mysql DB_DATABASE=raizes_nordeste_teste php artisan test --filter=ConcorrenciaTest
+```
+
+## Testes manuais (Postman)
+
+Em `docs/postman/` estão a coleção `raizes-nordeste.postman_collection.json` e o ambiente `raizes-nordeste.postman_environment.json` (`baseUrl` = `http://127.0.0.1:8000`). Cada requisição tem testes (`pm.test`) que conferem status, código de erro e corpo.
+
+1. Banco limpo e API no ar: `php artisan migrate:fresh --seed && php artisan serve`.
+2. No Postman, importe os dois arquivos, escolha o ambiente e rode a coleção inteira no Collection Runner (ou `npx newman run docs/postman/raizes-nordeste.postman_collection.json -e docs/postman/raizes-nordeste.postman_environment.json`).
+
+A pasta `00 Preparação` faz o login dos perfis do seed, abre a unidade 1 o dia todo (para rodar a qualquer hora; `migrate:fresh --seed` volta ao horário original) e descobre os ids do cardápio. As demais seguem em ordem e podem ser rodadas várias vezes sem recarregar o banco:
+
+| Pasta | O que cobre |
+| --- | --- |
+| T01 | login, token inválido, rota protegida sem token, perfil sem permissão (401/403) |
+| T02 | cadastro de cliente com consentimentos, 422 sem termos, revogação (LGPD) |
+| T03 | unidades e cardápio públicos; cozinha completa x unidade reduzida |
+| T04 | pedido com sucesso, total calculado no servidor, histórico, pedido de balcão |
+| T05 | `canalPedido` ausente ou inválido, itens vazios (422) |
+| T06 | estoque insuficiente (409), sem baixa parcial |
+| T07 | pagamento aprovado, replay por `Idempotency-Key`, pontos de fidelidade |
+| T08 | pagamento recusado (402), pedido cancelado, estoque devolvido |
+| T09 | gateway indisponível (503) e nova tentativa |
+| T10 | máquina de status por perfil, transição inválida (409), estado final |
+| T11 | escopo por perfil e unidade (403/404), filtros da listagem |
+| T12 | idempotência: replay, corpo diferente (409), chave inválida |
+| T13 | cancelamento por perfil, estorno de pagamento, de pontos e de estoque |
+| T14 | relatórios, dados do cliente mascarados, trilha de auditoria |
 
 ## Estado
 
